@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>欧托留日记</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="layout">
+        <!-- 左侧边栏 -->
+        <aside class="sidebar">
+            <div class="app-title">欧托留日记</div>
+
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="🔍 搜索标题或正文...">
+            </div>
+
+            <div class="tag-section">
+                <div class="section-title">
+                    <span>🏷️ 标签</span>
+                    <span id="clearTag" class="clear-tag" style="display:none;">清除</span>
+                </div>
+                <div class="tag-list" id="tagList">加载中...</div>
+            </div>
+        </aside>
+
+        <!-- 右侧主内容 -->
+        <main class="main">
+            <div class="main-header">
+                <div>
+                    <h1>我的日记</h1>
+                    <div class="status-tip" id="statusTip">加载中...</div>
+                </div>
+                <a href="edit.html" class="btn btn-primary">✏️ 写日记</a>
+            </div>
+
+            <div class="diary-list" id="diaryList">
+                <!-- 动态渲染 -->
+            </div>
+        </main>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/list.js"></script>
+</body>
+</html>

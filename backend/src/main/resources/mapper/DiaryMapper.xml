@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace 必须对应 DiaryMapper 接口的完整包名 -->
+<mapper namespace="com.otoluudiary.mapper.DiaryMapper">
+
+    <!-- 结果映射：数据库列 -> Java 对象属性；tags 列用自定义 TypeHandler 转成 List<String> -->
+    <resultMap id="diaryResultMap" type="com.otoluudiary.model.Diary">
+        <id     property="id"        column="id"/>
+        <result property="title"     column="title"/>
+        <result property="content"   column="content"/>
+        <result property="tags"      column="tags"
+                typeHandler="com.otoluudiary.handler.JsonStringListTypeHandler"/>
+        <result property="weather"   column="weather"/>
+        <result property="mood"      column="mood"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <!-- 公共字段片段，下面多条 SQL 复用 -->
+    <sql id="diaryColumns">
+        id, title, content, tags, weather, mood, created_at, updated_at
+    </sql>
+
+    <!-- 查询全部：按创建时间倒序（最新的在前） -->
+    <select id="findAll" resultMap="diaryResultMap">
+        SELECT <include refid="diaryColumns"/>
+        FROM diary
+        ORDER BY created_at DESC
+    </select>
+
+    <!-- 按 ID 查询 -->
+    <select id="findById" resultMap="diaryResultMap">
+        SELECT <include refid="diaryColumns"/>
+        FROM diary
+        WHERE id = #{id}
+    </select>
+
+    <!-- 新增 -->
+    <insert id="insert">
+        INSERT INTO diary (id, title, content, tags, weather, mood, created_at, updated_at)
+        VALUES (
+            #{id},
+            #{title},
+            #{content},
+            #{tags, typeHandler=com.otoluudiary.handler.JsonStringListTypeHandler},
+            #{weather},
+            #{mood},
+            #{createdAt},
+            #{updatedAt}
+        )
+    </insert>
+
+    <!-- 按 ID 更新 -->
+    <update id="update">
+        UPDATE diary
+        SET title      = #{title},
+            content    = #{content},
+            tags       = #{tags, typeHandler=com.otoluudiary.handler.JsonStringListTypeHandler},
+            weather    = #{weather},
+            mood       = #{mood},
+            updated_at = #{updatedAt}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 按 ID 删除 -->
+    <delete id="deleteById">
+        DELETE FROM diary
+        WHERE id = #{id}
+    </delete>
+
+    <!-- 关键词搜索：标题或正文模糊匹配；关键词为空时查全部（utf8mb4 排序规则默认不区分大小写） -->
+    <select id="searchByKeyword" resultMap="diaryResultMap">
+        SELECT <include refid="diaryColumns"/>
+        FROM diary
+        <where>
+            <if test="keyword != null and keyword != ''">
+                title   LIKE CONCAT('%', #{keyword}, '%')
+                OR
+                content LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+        </where>
+        ORDER BY created_at DESC
+    </select>
+
+    <!-- 按标签筛选：tags 是 JSON 数组，如 ["生活","旅游"]；
+         用 LIKE 匹配带双引号的标签项，避免“旅”误匹配“旅游”；两边都转小写实现忽略大小写 -->
+    <select id="filterByTag" resultMap="diaryResultMap">
+        SELECT <include refid="diaryColumns"/>
+        FROM diary
+        <where>
+            <if test="tag != null and tag != ''">
+                LOWER(CAST(tags AS CHAR)) LIKE CONCAT('%"', LOWER(#{tag}), '"%')
+            </if>
+        </where>
+        ORDER BY created_at DESC
+    </select>
+
+    <!-- 全部标签：用 JSON_TABLE 把 tags 数组拆成多行，去重、过滤空值、排序 -->
+    <select id="findAllTags" resultType="java.lang.String">
+        SELECT DISTINCT t.tag
+        FROM diary d,
+             JSON_TABLE(d.tags, '$[*]' COLUMNS (tag VARCHAR(100) PATH '$')) t
+        WHERE t.tag IS NOT NULL
+          AND TRIM(t.tag) != ''
+        ORDER BY t.tag
+    </select>
+
+    <!-- 总数 -->
+    <select id="count" resultType="long">
+        SELECT COUNT(*) FROM diary
+    </select>
+
+</mapper>

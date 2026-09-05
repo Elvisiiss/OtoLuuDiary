@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>写日记 - 欧托留日记</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="edit-wrap">
+        <div class="edit-header">
+            <span id="backBtn" class="back">← 返回列表</span>
+            <h1 id="pageTitle">写日记</h1>
+            <span style="width:80px;"></span>
+        </div>
+
+        <div class="edit-form">
+            <div class="form-item">
+                <label for="title">标题 *</label>
+                <input type="text" id="title" maxlength="100" placeholder="给这篇日记起个标题吧...">
+            </div>
+
+            <div class="form-row">
+                <div class="form-item">
+                    <label for="weather">天气（可选）</label>
+                    <input type="text" id="weather" maxlength="20" placeholder="如：晴 / 小雨">
+                </div>
+                <div class="form-item">
+                    <label for="mood">心情（可选）</label>
+                    <input type="text" id="mood" maxlength="20" placeholder="如：开心 / 平静">
+                </div>
+                <div class="form-item">
+                    <label for="tags">标签（可选，多个用逗号分隔）</label>
+                    <input type="text" id="tags" maxlength="200" placeholder="如：工作, 生活, 旅游">
+                </div>
+            </div>
+
+            <div class="form-item">
+                <label for="content">正文 *</label>
+                <textarea id="content" placeholder="写下今天发生的事...&#10;&#10;支持纯文本，换行会完整保留。"></textarea>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn btn-default" id="cancelBtn">取消</button>
+                <button type="button" class="btn btn-primary" id="saveBtn">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/edit.js"></script>
+</body>
+</html>

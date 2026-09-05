@@ -1,0 +1,45 @@
+# ============================================
+# OtoLuuDiary .gitignore
+# 技术栈：Java Spring Boot (Maven) + Electron (Node.js)
+# ============================================
+
+# ===== Java / Maven（后端构建产物）=====
+target/
+backend/target/
+*.class
+*.jar
+*.war
+*.ear
+*.hprof
+.mvn/wrapper/maven-wrapper.jar
+
+# ===== Node.js / Electron（前端依赖与构建产物）=====
+node_modules/
+frontend/node_modules/
+dist/
+out/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ===== 日志文件 =====
+*.log
+logs/
+
+# ===== IDE / 编辑器（本机专属配置）=====
+.idea/
+*.iml
+.trae/
+# 注：.vscode/settings.json 为团队共享配置，予以保留，不忽略
+
+# ===== 操作系统生成的文件 =====
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ===== 本地环境变量 / 密钥（如有）=====
+.env
+*.env
+application-local.properties
+application-local.yml
