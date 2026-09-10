@@ -14,6 +14,15 @@ public class DiaryUpdateRequest {
     private String weather;
     private String mood;
 
+    /** 重要度 0-5（可选） */
+    private Integer importance;
+
+    /** 位置信息（可选） */
+    private String location;
+
+    /** 卡片背景图片URL（可选） */
+    private String backgroundImage;
+
     /** 日记日期（可选，毫秒时间戳） */
     private Long diaryDate;
 
@@ -57,6 +66,30 @@ public class DiaryUpdateRequest {
 
     public void setMood(String mood) {
         this.mood = mood;
+    }
+
+    public Integer getImportance() {
+        return importance;
+    }
+
+    public void setImportance(Integer importance) {
+        this.importance = importance;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public String getBackgroundImage() {
+        return backgroundImage;
+    }
+
+    public void setBackgroundImage(String backgroundImage) {
+        this.backgroundImage = backgroundImage;
     }
 
     public Long getDiaryDate() {

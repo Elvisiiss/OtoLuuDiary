@@ -482,3 +482,155 @@ body {
     border-color: #f3c5c5;
     background-color: #fff5f5;
 }
+
+/* ============== 重要度星级选择器 ============== */
+.importance-picker {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 0;
+}
+.importance-picker .star {
+    font-size: 22px;
+    color: #d0d4e0;
+    cursor: pointer;
+    transition: color 0.15s, transform 0.15s;
+    user-select: none;
+}
+.importance-picker .star:hover,
+.importance-picker .star.active {
+    color: #f5a623;
+    transform: scale(1.15);
+}
+.importance-picker .star.active {
+    text-shadow: 0 0 4px rgba(245, 166, 35, 0.3);
+}
+.importance-clear {
+    margin-left: 8px;
+    font-size: 13px;
+    color: var(--text-sub);
+    cursor: pointer;
+    opacity: 0.5;
+    transition: opacity 0.2s;
+}
+.importance-clear:hover {
+    opacity: 1;
+    color: var(--danger);
+}
+
+/* 两列表单行 */
+.form-row-2col {
+    grid-template-columns: 1fr 2fr !important;
+}
+
+/* ============== Quill 编辑器覆盖 ============== */
+#editor {
+    min-height: 280px;
+    font-size: 15px;
+    line-height: 1.8;
+}
+#editorToolbar {
+    border: 1px solid var(--border);
+    border-bottom: none;
+    border-radius: 6px 6px 0 0;
+    background: #fafbfd;
+}
+#editor {
+    border: 1px solid var(--border);
+    border-radius: 0 0 6px 6px;
+}
+.ql-editor {
+    font-family: "Microsoft YaHei", "PingFang SC", "Segoe UI", Tahoma, sans-serif;
+}
+
+/* ============== 上传区 ============== */
+.upload-zone {
+    border: 2px dashed var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+}
+.upload-zone:hover,
+.upload-zone.dragover {
+    border-color: var(--primary);
+    background: #f5f8ff;
+}
+.upload-hint {
+    color: var(--text-sub);
+    font-size: 13px;
+    padding: 10px 0;
+}
+.upload-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 12px;
+}
+.upload-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #f5f7fb;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 12px;
+    color: var(--text-sub);
+}
+.upload-item img {
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+.upload-video-icon {
+    font-size: 24px;
+}
+.upload-name {
+    max-width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ============== 带背景图的卡片 ============== */
+.diary-card.has-bg {
+    color: #fff;
+    position: relative;
+}
+.diary-card.has-bg::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    border-radius: 10px;
+}
+.diary-card.has-bg > * {
+    position: relative;
+    z-index: 1;
+}
+.diary-card.has-bg .card-title {
+    color: #fff;
+}
+.diary-card.has-bg .card-meta {
+    color: rgba(255, 255, 255, 0.8);
+}
+.diary-card.has-bg .card-content {
+    color: rgba(255, 255, 255, 0.85);
+}
+.diary-card.has-bg .card-content::after {
+    background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.4));
+}
+.diary-card.has-bg .card-actions .btn {
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.3);
+}
+.diary-card.has-bg .card-actions .btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+/* 列表页 meta 新图标 */
+.meta-importance::before { content: "⭐"; }
+.meta-location::before  { content: "📍"; }

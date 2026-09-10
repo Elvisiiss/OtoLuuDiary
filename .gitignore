@@ -38,6 +38,10 @@ logs/
 Thumbs.db
 desktop.ini
 
+# ===== 上传的媒体文件 =====
+uploads/
+backend/uploads/
+
 # ===== 本地环境变量 / 密钥（如有）=====
 .env
 *.env

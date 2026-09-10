@@ -120,7 +120,38 @@ var DiaryApi = {
         var q = tag ? ('?tag=' + encodeURIComponent(tag)) : '';
         return request('/diaries/tag' + q, { method: 'GET' });
     },
-    allTags: function() { return request('/tags', { method: 'GET' }); }
+    allTags: function() { return request('/tags', { method: 'GET' }); },
+
+    /** 上传媒体文件（multipart/form-data） */
+    uploadMedia: async function(formData) {
+        var url = API_BASE + '/media/upload';
+        var token = localStorage.getItem(TOKEN_KEY);
+        var headers = {};
+        if (token) {
+            headers['Authorization'] = 'Bearer ' + token;
+        }
+        // 注意：不要手动设置 Content-Type，让浏览器自动加 boundary
+        try {
+            var resp = await fetch(url, {
+                method: 'POST',
+                headers: headers,
+                body: formData
+            });
+            if (resp.status === 401) {
+                localStorage.removeItem(TOKEN_KEY);
+                location.href = 'login.html';
+                return { success: false, message: '未登录', data: null };
+            }
+            return await resp.json();
+        } catch (e) {
+            return { success: false, message: '上传失败：' + e.message, data: null };
+        }
+    },
+
+    /** 查询某篇日记的全部媒体 */
+    listMedia: function(diaryId) {
+        return request('/media/diary/' + encodeURIComponent(diaryId), { method: 'GET' });
+    }
 };
 
 window.AuthApi = AuthApi;

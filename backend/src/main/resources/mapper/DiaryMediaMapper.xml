@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.otoluudiary.mapper.DiaryMediaMapper">
+
+    <resultMap id="mediaResultMap" type="com.otoluudiary.model.DiaryMedia">
+        <id     property="id"        column="id"/>
+        <result property="diaryId"   column="diary_id"/>
+        <result property="fileName"  column="file_name"/>
+        <result property="filePath"  column="file_path"/>
+        <result property="fileType"  column="file_type"/>
+        <result property="fileSize"  column="file_size"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
+    <insert id="insert">
+        INSERT INTO diary_media (id, diary_id, file_name, file_path, file_type, file_size, created_at)
+        VALUES (#{id}, #{diaryId}, #{fileName}, #{filePath}, #{fileType}, #{fileSize}, #{createdAt})
+    </insert>
+
+    <select id="findByDiaryId" resultMap="mediaResultMap">
+        SELECT id, diary_id, file_name, file_path, file_type, file_size, created_at
+        FROM diary_media
+        WHERE diary_id = #{diaryId}
+        ORDER BY created_at ASC
+    </select>
+
+    <select id="findById" resultMap="mediaResultMap">
+        SELECT id, diary_id, file_name, file_path, file_type, file_size, created_at
+        FROM diary_media
+        WHERE id = #{id}
+    </select>
+
+    <delete id="deleteById">
+        DELETE FROM diary_media WHERE id = #{id}
+    </delete>
+
+    <delete id="deleteByDiaryId">
+        DELETE FROM diary_media WHERE diary_id = #{diaryId}
+    </delete>
+
+</mapper>

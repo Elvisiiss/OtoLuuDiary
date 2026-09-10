@@ -36,10 +36,13 @@ spring:
   # 启动时自动执行 classpath 下的 schema.sql 建表（CREATE TABLE IF NOT EXISTS，可重复执行）
   sql:
     init:
-      mode: always
-      encoding: UTF-8
-      # ALTER TABLE 重复执行会报错，开启此项保证启动不中断
-      continue-on-error: true
+      # 建表语句已移至 docs/创表语句/，首次建库请手动执行
+      mode: never
+  # 文件上传限制
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
 
 # MyBatis 配置
 mybatis:
@@ -62,6 +65,9 @@ otoluudiary:
     password: "123456"
     # Token 有效期（小时）
     token-expire-hours: 72
+  # 媒体文件上传目录
+  upload:
+    dir: uploads
 
 # 日志配置
 logging:

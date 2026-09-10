@@ -30,6 +30,15 @@ public class Diary {
     /** 心情（可选），如 "开心"、"平静" */
     private String mood;
 
+    /** 重要度 0-5（0=未设置，1=最低，5=最高） */
+    private Integer importance;
+
+    /** 位置信息，如 "北京市朝阳区" */
+    private String location;
+
+    /** 卡片背景图片URL */
+    private String backgroundImage;
+
     /** 日记日期（当天0点毫秒时间戳，由用户选择或按4:00规则默认） */
     private Long diaryDate;
 
@@ -50,6 +59,7 @@ public class Diary {
      */
     public static Diary createNew(String userId, String title, String content,
                                    List<String> tags, String weather, String mood,
+                                   Integer importance, String location, String backgroundImage,
                                    Long diaryDate) {
         Diary diary = new Diary();
         diary.setId(UUID.randomUUID().toString());
@@ -59,6 +69,9 @@ public class Diary {
         diary.setTags(tags != null ? tags : List.of());
         diary.setWeather(weather);
         diary.setMood(mood);
+        diary.setImportance(importance != null ? importance : 0);
+        diary.setLocation(location);
+        diary.setBackgroundImage(backgroundImage);
         diary.setDiaryDate(diaryDate);
         long now = System.currentTimeMillis();
         diary.setCreatedAt(now);
@@ -122,6 +135,30 @@ public class Diary {
 
     public void setMood(String mood) {
         this.mood = mood;
+    }
+
+    public Integer getImportance() {
+        return importance;
+    }
+
+    public void setImportance(Integer importance) {
+        this.importance = importance;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public String getBackgroundImage() {
+        return backgroundImage;
+    }
+
+    public void setBackgroundImage(String backgroundImage) {
+        this.backgroundImage = backgroundImage;
     }
 
     public Long getDiaryDate() {

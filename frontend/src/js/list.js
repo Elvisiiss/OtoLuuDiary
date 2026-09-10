@@ -43,9 +43,16 @@
     function previewContent(text, maxLen) {
         maxLen = maxLen || 260;
         if (!text) return '';
-        // 去掉多余空白
         const t = text.replace(/\s+/g, ' ').trim();
         return t.length > maxLen ? t.substring(0, maxLen) + '……' : t;
+    }
+
+    /** 去除 HTML 标签，提取纯文本 */
+    function stripHtml(html) {
+        if (!html) return '';
+        var tmp = document.createElement('div');
+        tmp.innerHTML = html;
+        return tmp.textContent || tmp.innerText || '';
     }
 
     // ========== 渲染函数 ==========
@@ -72,11 +79,23 @@
                 : '';
             const meta = [];
             meta.push(`<span class="meta-time">${formatDate(d.diaryDate || d.createdAt)}</span>`);
+            if (d.importance > 0) {
+                meta.push(`<span class="meta-importance">${'★'.repeat(d.importance)}${'☆'.repeat(5 - d.importance)}</span>`);
+            }
+            if (d.location) meta.push(`<span class="meta-location">${escapeHtml(d.location)}</span>`);
             if (d.weather) meta.push(`<span class="meta-weather">${escapeHtml(d.weather)}</span>`);
             if (d.mood)    meta.push(`<span class="meta-mood">${escapeHtml(d.mood)}</span>`);
 
+            // 背景图片样式
+            var bgStyle = '';
+            var bgClass = '';
+            if (d.backgroundImage) {
+                bgStyle = ` style="background-image: url('${escapeHtml(d.backgroundImage)}'); background-size: cover; background-position: center;"`;
+                bgClass = ' has-bg';
+            }
+
             return `
-                <div class="diary-card" data-id="${d.id}">
+                <div class="diary-card${bgClass}" data-id="${d.id}"${bgStyle}>
                     <div class="card-header">
                         <div class="card-title">${escapeHtml(d.title || '(无标题)')}</div>
                         <div class="card-actions">
@@ -85,7 +104,7 @@
                         </div>
                     </div>
                     <div class="card-meta">${meta.join('')}</div>
-                    <div class="card-content">${escapeHtml(previewContent(d.content))}</div>
+                    <div class="card-content">${escapeHtml(previewContent(stripHtml(d.content)))}</div>
                     ${tagsHtml}
                 </div>
             `;

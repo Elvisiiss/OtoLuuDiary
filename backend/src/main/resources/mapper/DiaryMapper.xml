@@ -5,21 +5,26 @@
 <mapper namespace="com.otoluudiary.mapper.DiaryMapper">
 
     <resultMap id="diaryResultMap" type="com.otoluudiary.model.Diary">
-        <id     property="id"        column="id"/>
-        <result property="userId"    column="user_id"/>
-        <result property="title"     column="title"/>
-        <result property="content"   column="content"/>
-        <result property="tags"      column="tags"
+        <id     property="id"              column="id"/>
+        <result property="userId"          column="user_id"/>
+        <result property="title"           column="title"/>
+        <result property="content"         column="content"/>
+        <result property="tags"            column="tags"
                 typeHandler="com.otoluudiary.handler.JsonStringListTypeHandler"/>
-        <result property="weather"   column="weather"/>
-        <result property="mood"      column="mood"/>
-        <result property="diaryDate" column="diary_date"/>
-        <result property="createdAt" column="created_at"/>
-        <result property="updatedAt" column="updated_at"/>
+        <result property="weather"         column="weather"/>
+        <result property="mood"            column="mood"/>
+        <result property="importance"      column="importance"/>
+        <result property="location"        column="location"/>
+        <result property="backgroundImage" column="background_image"/>
+        <result property="diaryDate"       column="diary_date"/>
+        <result property="createdAt"       column="created_at"/>
+        <result property="updatedAt"       column="updated_at"/>
     </resultMap>
 
     <sql id="diaryColumns">
-        id, user_id, title, content, tags, weather, mood, diary_date, created_at, updated_at
+        id, user_id, title, content, tags, weather, mood,
+        importance, location, background_image,
+        diary_date, created_at, updated_at
     </sql>
 
     <!-- 查询指定用户的全部日记 -->
@@ -37,7 +42,9 @@
     </select>
 
     <insert id="insert">
-        INSERT INTO diary (id, user_id, title, content, tags, weather, mood, diary_date, created_at, updated_at)
+        INSERT INTO diary (id, user_id, title, content, tags, weather, mood,
+                           importance, location, background_image,
+                           diary_date, created_at, updated_at)
         VALUES (
             #{id},
             #{userId},
@@ -46,6 +53,9 @@
             #{tags, typeHandler=com.otoluudiary.handler.JsonStringListTypeHandler},
             #{weather},
             #{mood},
+            #{importance},
+            #{location},
+            #{backgroundImage},
             #{diaryDate},
             #{createdAt},
             #{updatedAt}
@@ -54,13 +64,16 @@
 
     <update id="update">
         UPDATE diary
-        SET title      = #{title},
-            content    = #{content},
-            tags       = #{tags, typeHandler=com.otoluudiary.handler.JsonStringListTypeHandler},
-            weather    = #{weather},
-            mood       = #{mood},
-            diary_date = #{diaryDate},
-            updated_at = #{updatedAt}
+        SET title            = #{title},
+            content          = #{content},
+            tags             = #{tags, typeHandler=com.otoluudiary.handler.JsonStringListTypeHandler},
+            weather          = #{weather},
+            mood             = #{mood},
+            importance       = #{importance},
+            location         = #{location},
+            background_image = #{backgroundImage},
+            diary_date       = #{diaryDate},
+            updated_at       = #{updatedAt}
         WHERE id = #{id}
     </update>
 

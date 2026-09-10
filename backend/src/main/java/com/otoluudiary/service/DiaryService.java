@@ -18,10 +18,12 @@ import java.util.List;
 public class DiaryService {
 
     private final DiaryMapper diaryMapper;
+    private final MediaService mediaService;
 
     @Autowired
-    public DiaryService(DiaryMapper diaryMapper) {
+    public DiaryService(DiaryMapper diaryMapper, MediaService mediaService) {
         this.diaryMapper = diaryMapper;
+        this.mediaService = mediaService;
     }
 
     /** 查询指定用户的全部日记（按时间倒序） */
@@ -48,6 +50,9 @@ public class DiaryService {
                 req.getTags(),
                 req.getWeather(),
                 req.getMood(),
+                req.getImportance(),
+                req.getLocation(),
+                req.getBackgroundImage(),
                 diaryDate
         );
         diaryMapper.insert(diary);
@@ -80,14 +85,18 @@ public class DiaryService {
         if (req.getTags() != null) existing.setTags(req.getTags());
         if (req.getWeather() != null) existing.setWeather(req.getWeather());
         if (req.getMood() != null) existing.setMood(req.getMood());
+        if (req.getImportance() != null) existing.setImportance(req.getImportance());
+        if (req.getLocation() != null) existing.setLocation(req.getLocation());
+        if (req.getBackgroundImage() != null) existing.setBackgroundImage(req.getBackgroundImage());
         if (req.getDiaryDate() != null) existing.setDiaryDate(req.getDiaryDate());
         existing.setUpdatedAt(System.currentTimeMillis());
         diaryMapper.update(existing);
         return existing;
     }
 
-    /** 删除日记；ID 不存在返回 false */
+    /** 删除日记（同时删除关联的媒体文件）；ID 不存在返回 false */
     public boolean deleteById(String id) {
+        mediaService.deleteByDiaryId(id);
         return diaryMapper.deleteById(id) > 0;
     }
 

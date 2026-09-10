@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <title>写日记 - 欧托留日记</title>
     <link rel="stylesheet" href="css/style.css">
+    <!-- Quill 富文本编辑器 -->
+    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet">
 </head>
 <body>
     <div class="edit-wrap">
@@ -14,16 +16,19 @@
         </div>
 
         <div class="edit-form">
+            <!-- 标题 -->
             <div class="form-item">
                 <label for="title">标题 *</label>
                 <input type="text" id="title" maxlength="100" placeholder="给这篇日记起个标题吧...">
             </div>
 
+            <!-- 日记日期 -->
             <div class="form-item">
                 <label for="diaryDate">日记日期</label>
                 <input type="date" id="diaryDate">
             </div>
 
+            <!-- 天气 / 心情 / 标签 -->
             <div class="form-row">
                 <div class="form-item">
                     <label for="weather">天气（可选）</label>
@@ -39,11 +44,91 @@
                 </div>
             </div>
 
-            <div class="form-item">
-                <label for="content">正文 *</label>
-                <textarea id="content" placeholder="写下今天发生的事...&#10;&#10;支持纯文本，换行会完整保留。"></textarea>
+            <!-- 重要度 / 位置 -->
+            <div class="form-row form-row-2col">
+                <div class="form-item">
+                    <label>重要度</label>
+                    <div class="importance-picker" id="importancePicker">
+                        <span class="star" data-val="1">★</span>
+                        <span class="star" data-val="2">★</span>
+                        <span class="star" data-val="3">★</span>
+                        <span class="star" data-val="4">★</span>
+                        <span class="star" data-val="5">★</span>
+                        <span class="importance-clear" id="importanceClear" title="清除">✕</span>
+                    </div>
+                </div>
+                <div class="form-item">
+                    <label for="location">位置（可选）</label>
+                    <input type="text" id="location" maxlength="200" placeholder="如：北京市朝阳区">
+                </div>
             </div>
 
+            <!-- 背景图片 -->
+            <div class="form-item">
+                <label for="backgroundImage">卡片背景图片URL（可选）</label>
+                <input type="text" id="backgroundImage" maxlength="500" placeholder="粘贴图片链接，让卡片更有氛围感...">
+            </div>
+
+            <!-- 正文（Quill 富文本） -->
+            <div class="form-item">
+                <label>正文 *</label>
+                <div id="editorToolbar">
+                    <span class="ql-formats">
+                        <select class="ql-header">
+                            <option selected>正文</option>
+                            <option value="1">标题1</option>
+                            <option value="2">标题2</option>
+                            <option value="3">标题3</option>
+                        </select>
+                    </span>
+                    <span class="ql-formats">
+                        <button class="ql-bold" title="加粗"></button>
+                        <button class="ql-italic" title="斜体"></button>
+                        <button class="ql-underline" title="下划线"></button>
+                        <button class="ql-strike" title="删除线"></button>
+                    </span>
+                    <span class="ql-formats">
+                        <select class="ql-color" title="文字颜色"></select>
+                        <select class="ql-background" title="背景颜色"></select>
+                    </span>
+                    <span class="ql-formats">
+                        <select class="ql-size" title="字号">
+                            <option value="small">小字</option>
+                            <option selected>正文</option>
+                            <option value="large">大字</option>
+                            <option value="huge">超大</option>
+                        </select>
+                    </span>
+                    <span class="ql-formats">
+                        <button class="ql-blockquote" title="引用"></button>
+                        <button class="ql-code-block" title="代码块"></button>
+                    </span>
+                    <span class="ql-formats">
+                        <button class="ql-list" value="ordered" title="有序列表"></button>
+                        <button class="ql-list" value="bullet" title="无序列表"></button>
+                    </span>
+                    <span class="ql-formats">
+                        <button class="ql-image" title="插入图片"></button>
+                        <button class="ql-video" title="插入视频"></button>
+                    </span>
+                    <span class="ql-formats">
+                        <button class="ql-clean" title="清除格式"></button>
+                    </span>
+                </div>
+                <div id="editor"></div>
+            </div>
+
+            <!-- 媒体上传区 -->
+            <div class="form-item">
+                <label>上传图片 / 视频</label>
+                <div class="upload-zone" id="uploadZone">
+                    <input type="file" id="fileInput" accept="image/*,video/*" multiple style="display:none;">
+                    <div class="upload-hint">点击或拖拽文件到此处上传</div>
+                    <div class="upload-list" id="uploadList"></div>
+                </div>
+            </div>
+
+            <!-- 操作按钮 -->
             <div class="form-actions">
                 <button type="button" class="btn btn-default" id="cancelBtn">取消</button>
                 <button type="button" class="btn btn-primary" id="saveBtn">保存</button>
@@ -51,6 +136,7 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
     <script src="js/api.js"></script>
     <script src="js/edit.js"></script>
 </body>
