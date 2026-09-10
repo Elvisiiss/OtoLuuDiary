@@ -1,5 +1,8 @@
 package com.otoluudiary.service;
 
+import com.otoluudiary.mapper.UserMapper;
+import com.otoluudiary.model.User;
+import com.otoluudiary.util.BCryptUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -11,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * 认证服务
  * 使用 Redis 存储登录 Token，实现会话管理
+ * Token 中存储 userId:phone:nickname 格式
  */
 @Service
 public class AuthService {
@@ -21,73 +25,107 @@ public class AuthService {
     @Autowired
     private StringRedisTemplate redisTemplate;
 
+    @Autowired
+    private UserMapper userMapper;
+
     /** Token 有效期（小时），从配置文件读取，默认 72 小时（3天） */
     @Value("${otoluudiary.auth.token-expire-hours:72}")
     private long tokenExpireHours;
 
-    /** 管理员密码，从配置文件读取 */
-    @Value("${otoluudiary.auth.password:123456}")
-    private String adminPassword;
-
     /**
-     * 登录验证并生成 Token
-     * @param password 密码
-     * @return Token 字符串，密码错误返回 null
+     * 手机号+密码登录
+     * @return Token 字符串，失败返回 null
      */
-    public String login(String password) {
-        if (!adminPassword.equals(password)) {
+    public String loginByPhone(String phone, String password) {
+        User user = userMapper.findByPhone(phone);
+        if (user == null) {
             return null;
         }
+        if (!BCryptUtil.matches(password, user.getPassword())) {
+            return null;
+        }
+        return login(user.getId(), user.getPhone(), user.getNickname());
+    }
 
-        // 生成随机 Token
+    /**
+     * 生成 Token 并存储（注册成功后也可调用）
+     * @param userId 用户ID
+     * @param phone 手机号
+     * @param nickname 昵称
+     * @return Token
+     */
+    public String login(String userId, String phone, String nickname) {
         String token = UUID.randomUUID().toString().replace("-", "");
 
-        // 先清除该用户旧的 Token（同一时间只允许一个有效会话）
-        String oldToken = redisTemplate.opsForValue().get(USER_TOKEN_PREFIX + "admin");
+        // 踢掉该用户旧会话
+        String oldToken = redisTemplate.opsForValue().get(USER_TOKEN_PREFIX + userId);
         if (oldToken != null) {
             redisTemplate.delete(TOKEN_PREFIX + oldToken);
         }
 
-        // 存储 Token -> 用户名，设置过期时间
-        redisTemplate.opsForValue().set(TOKEN_PREFIX + token, "admin", tokenExpireHours, TimeUnit.HOURS);
-        // 存储 用户 -> 当前Token（用于踢掉旧会话）
-        redisTemplate.opsForValue().set(USER_TOKEN_PREFIX + "admin", token, tokenExpireHours, TimeUnit.HOURS);
+        // Token 存储: "userId:phone:nickname"
+        String value = userId + ":" + phone + ":" + (nickname != null ? nickname : "");
+        redisTemplate.opsForValue().set(TOKEN_PREFIX + token, value, tokenExpireHours, TimeUnit.HOURS);
+        redisTemplate.opsForValue().set(USER_TOKEN_PREFIX + userId, token, tokenExpireHours, TimeUnit.HOURS);
 
         return token;
     }
 
     /**
      * 验证 Token 是否有效
-     * @param token Token 字符串
-     * @return 有效返回 true
      */
     public boolean validateToken(String token) {
         if (token == null || token.isEmpty()) {
             return false;
         }
-        String user = redisTemplate.opsForValue().get(TOKEN_PREFIX + token);
-        return user != null;
+        String value = redisTemplate.opsForValue().get(TOKEN_PREFIX + token);
+        return value != null;
     }
 
     /**
-     * 登出，删除 Token
-     * @param token Token 字符串
+     * 从 Token 中获取 userId
+     */
+    public String getUserId(String token) {
+        String value = redisTemplate.opsForValue().get(TOKEN_PREFIX + token);
+        if (value == null) return null;
+        return value.split(":")[0];
+    }
+
+    /**
+     * 从 Token 中获取 nickname
+     */
+    public String getNickname(String token) {
+        String value = redisTemplate.opsForValue().get(TOKEN_PREFIX + token);
+        if (value == null) return null;
+        String[] parts = value.split(":");
+        return parts.length > 2 ? parts[2] : "";
+    }
+
+    /**
+     * 登出
      */
     public void logout(String token) {
         if (token != null && !token.isEmpty()) {
+            String value = redisTemplate.opsForValue().get(TOKEN_PREFIX + token);
             redisTemplate.delete(TOKEN_PREFIX + token);
-            redisTemplate.delete(USER_TOKEN_PREFIX + "admin");
+            if (value != null) {
+                String userId = value.split(":")[0];
+                redisTemplate.delete(USER_TOKEN_PREFIX + userId);
+            }
         }
     }
 
     /**
-     * 刷新 Token 有效期（每次有效请求后调用，实现"滑动过期"）
-     * @param token Token 字符串
+     * 刷新 Token 有效期（滑动过期）
      */
     public void refreshToken(String token) {
         if (token != null && !token.isEmpty()) {
             redisTemplate.expire(TOKEN_PREFIX + token, tokenExpireHours, TimeUnit.HOURS);
-            redisTemplate.expire(USER_TOKEN_PREFIX + "admin", tokenExpireHours, TimeUnit.HOURS);
+            String value = redisTemplate.opsForValue().get(TOKEN_PREFIX + token);
+            if (value != null) {
+                String userId = value.split(":")[0];
+                redisTemplate.expire(USER_TOKEN_PREFIX + userId, tokenExpireHours, TimeUnit.HOURS);
+            }
         }
     }
 }

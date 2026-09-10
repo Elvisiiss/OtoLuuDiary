@@ -1,7 +1,9 @@
 package com.otoluudiary.controller;
 
+import com.otoluudiary.config.AuthInterceptor;
 import com.otoluudiary.model.Diary;
 import com.otoluudiary.service.DiaryService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,16 +13,7 @@ import java.util.List;
  * 日记 REST API 接口层
  *
  * 全部接口前缀：/api （由 application.yml 中 context-path 配置）
- *
- * 接口清单：
- *   GET    /diaries                  全部日记列表
- *   GET    /diaries/{id}             单条日记详情
- *   POST   /diaries                  新增日记
- *   PUT    /diaries/{id}             修改日记
- *   DELETE /diaries/{id}             删除日记
- *   GET    /diaries/search?keyword=  关键词搜索
- *   GET    /diaries/tag?tag=         按标签筛选
- *   GET    /tags                     全部标签列表
+ * 所有接口需要登录（Token），数据按用户隔离
  */
 @RestController
 @RequestMapping("/diaries")
@@ -34,12 +27,18 @@ public class DiaryController {
         this.diaryService = diaryService;
     }
 
+    /** 从 request 中获取当前登录用户的 ID */
+    private String getCurrentUserId(HttpServletRequest request) {
+        return (String) request.getAttribute(AuthInterceptor.ATTR_USER_ID);
+    }
+
     // ========== 查询 ==========
 
-    /** GET /api/diaries - 全部日记列表 */
+    /** GET /api/diaries - 全部日记列表（当前用户） */
     @GetMapping
-    public ApiResponse<List<Diary>> listAll() {
-        return ApiResponse.ok(diaryService.findAll());
+    public ApiResponse<List<Diary>> listAll(HttpServletRequest request) {
+        String userId = getCurrentUserId(request);
+        return ApiResponse.ok(diaryService.findAll(userId));
     }
 
     /** GET /api/diaries/{id} - 单条日记详情 */
@@ -56,11 +55,13 @@ public class DiaryController {
 
     /** POST /api/diaries - 新增日记 */
     @PostMapping
-    public ApiResponse<Diary> create(@RequestBody DiaryCreateRequest req) {
+    public ApiResponse<Diary> create(@RequestBody DiaryCreateRequest req,
+                                     HttpServletRequest request) {
         if (!req.isValid()) {
             return ApiResponse.fail(req.validationMessage());
         }
-        Diary created = diaryService.create(req);
+        String userId = getCurrentUserId(request);
+        Diary created = diaryService.create(userId, req);
         return ApiResponse.ok("日记创建成功", created);
     }
 
@@ -93,13 +94,17 @@ public class DiaryController {
 
     /** GET /api/diaries/search?keyword=xxx - 关键词搜索 */
     @GetMapping("/search")
-    public ApiResponse<List<Diary>> search(@RequestParam(required = false) String keyword) {
-        return ApiResponse.ok(diaryService.searchByKeyword(keyword));
+    public ApiResponse<List<Diary>> search(@RequestParam(required = false) String keyword,
+                                           HttpServletRequest request) {
+        String userId = getCurrentUserId(request);
+        return ApiResponse.ok(diaryService.searchByKeyword(userId, keyword));
     }
 
     /** GET /api/diaries/tag?tag=xxx - 按标签筛选 */
     @GetMapping("/tag")
-    public ApiResponse<List<Diary>> filterByTag(@RequestParam(required = false) String tag) {
-        return ApiResponse.ok(diaryService.filterByTag(tag));
+    public ApiResponse<List<Diary>> filterByTag(@RequestParam(required = false) String tag,
+                                                HttpServletRequest request) {
+        String userId = getCurrentUserId(request);
+        return ApiResponse.ok(diaryService.filterByTag(userId, tag));
     }
 }

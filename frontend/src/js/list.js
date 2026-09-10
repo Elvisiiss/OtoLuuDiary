@@ -213,6 +213,19 @@
         }
     }
 
+    // ========== 加载用户信息 ==========
+    async function loadUserInfo() {
+        var el = document.getElementById('userInfo');
+        if (!el) return;
+        var resp = await window.AuthApi.getUserInfo();
+        if (resp.success && resp.data) {
+            var name = resp.data.nickname || resp.data.phone;
+            el.textContent = '👤 ' + escapeHtml(name);
+        } else {
+            el.textContent = '👤 用户';
+        }
+    }
+
     // ========== 启动 ==========
     document.addEventListener('DOMContentLoaded', function () {
         // 检查登录状态
@@ -224,6 +237,7 @@
         bindEvents();
         loadTags();
         loadData();
+        loadUserInfo();
 
         // 退出登录按钮
         var logoutBtn = document.getElementById('logoutBtn');

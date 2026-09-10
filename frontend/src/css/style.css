@@ -437,12 +437,32 @@ body {
     border-radius: 8px;
     margin-top: 4px;
 }
+.login-links {
+    text-align: center;
+    margin-top: 8px;
+}
+.login-links a {
+    color: var(--primary);
+    font-size: 13px;
+    text-decoration: none;
+}
+.login-links a:hover {
+    text-decoration: underline;
+}
 
 /* ============== 侧边栏底部 ============== */
 .sidebar-footer {
     margin-top: auto;
     padding-top: 16px;
     border-top: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.user-info {
+    font-size: 13px;
+    color: var(--text-sub);
+    padding: 0 4px;
 }
 .btn-logout {
     width: 100%;

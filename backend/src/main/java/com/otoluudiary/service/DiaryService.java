@@ -11,7 +11,6 @@ import java.util.List;
 
 /**
  * 日记业务逻辑层
- * 负责处理业务规则（如参数校验、字段合并），调用 DiaryMapper（MyBatis）完成数据库操作
  */
 @Service
 public class DiaryService {
@@ -23,9 +22,9 @@ public class DiaryService {
         this.diaryMapper = diaryMapper;
     }
 
-    /** 查询全部日记（按时间倒序） */
-    public List<Diary> findAll() {
-        return diaryMapper.findAll();
+    /** 查询指定用户的全部日记（按时间倒序） */
+    public List<Diary> findAll(String userId) {
+        return diaryMapper.findAll(userId);
     }
 
     /** 按 ID 查询单条 */
@@ -34,8 +33,9 @@ public class DiaryService {
     }
 
     /** 新增日记 */
-    public Diary create(DiaryCreateRequest req) {
+    public Diary create(String userId, DiaryCreateRequest req) {
         Diary diary = Diary.createNew(
+                userId,
                 req.getTitle(),
                 req.getContent(),
                 req.getTags(),
@@ -60,7 +60,6 @@ public class DiaryService {
         if (req.getTags() != null) existing.setTags(req.getTags());
         if (req.getWeather() != null) existing.setWeather(req.getWeather());
         if (req.getMood() != null) existing.setMood(req.getMood());
-        // 更新修改时间
         existing.setUpdatedAt(System.currentTimeMillis());
         diaryMapper.update(existing);
         return existing;
@@ -71,18 +70,18 @@ public class DiaryService {
         return diaryMapper.deleteById(id) > 0;
     }
 
-    /** 关键词搜索 */
-    public List<Diary> searchByKeyword(String keyword) {
-        return diaryMapper.searchByKeyword(keyword);
+    /** 关键词搜索（限定用户） */
+    public List<Diary> searchByKeyword(String userId, String keyword) {
+        return diaryMapper.searchByKeyword(userId, keyword);
     }
 
-    /** 按标签筛选 */
-    public List<Diary> filterByTag(String tag) {
-        return diaryMapper.filterByTag(tag);
+    /** 按标签筛选（限定用户） */
+    public List<Diary> filterByTag(String userId, String tag) {
+        return diaryMapper.filterByTag(userId, tag);
     }
 
-    /** 获取全部标签 */
-    public List<String> findAllTags() {
-        return diaryMapper.findAllTags();
+    /** 获取指定用户的全部标签 */
+    public List<String> findAllTags(String userId) {
+        return diaryMapper.findAllTags(userId);
     }
 }

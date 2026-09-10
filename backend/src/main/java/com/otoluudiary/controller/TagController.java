@@ -1,6 +1,8 @@
 package com.otoluudiary.controller;
 
+import com.otoluudiary.config.AuthInterceptor;
 import com.otoluudiary.service.DiaryService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,9 +26,10 @@ public class TagController {
         this.diaryService = diaryService;
     }
 
-    /** GET /api/tags - 获取全部已使用的标签（去重后返回） */
+    /** GET /api/tags - 获取当前用户的所有已使用标签 */
     @GetMapping
-    public ApiResponse<List<String>> getAllTags() {
-        return ApiResponse.ok(diaryService.findAllTags());
+    public ApiResponse<List<String>> getAllTags(HttpServletRequest request) {
+        String userId = (String) request.getAttribute(AuthInterceptor.ATTR_USER_ID);
+        return ApiResponse.ok(diaryService.findAllTags(userId));
     }
 }

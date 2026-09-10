@@ -19,9 +19,8 @@ import java.util.List;
 /**
  * 旧数据迁移（一次性）
  *
- * 首次连上 MySQL、diary 表为空时，把旧版 TXT 文件（data/diaries.txt，每行一条 JSON）
- * 里的历史日记自动导入数据库。
- * 数据库已有数据，或找不到 TXT 文件时自动跳过，所以每次启动执行都是安全的。
+ * 首次连上 MySQL、diary 表为空时，把旧版 TXT 文件里的历史日记自动导入数据库。
+ * 旧数据没有 user_id，会设为 null（属于"无主数据"）。
  */
 @Component
 public class LegacyDataMigrationRunner implements CommandLineRunner {
@@ -61,6 +60,10 @@ public class LegacyDataMigrationRunner implements CommandLineRunner {
                 try {
                     Diary diary = objectMapper.readValue(line, new TypeReference<Diary>() {});
                     if (diary != null && diary.getId() != null) {
+                        // 旧数据没有 user_id，设为 null
+                        if (diary.getUserId() == null) {
+                            diary.setUserId(null);
+                        }
                         diaryMapper.insert(diary);
                         imported++;
                     }
@@ -70,15 +73,10 @@ public class LegacyDataMigrationRunner implements CommandLineRunner {
             }
             log.info("旧数据迁移完成：从 {} 共导入 {} 条日记到 MySQL", dataFile.toAbsolutePath(), imported);
         } catch (Exception e) {
-            // 迁移失败不阻止应用启动
             log.warn("旧数据迁移过程中出现异常（不影响正常使用）：{}", e.getMessage(), e);
         }
     }
 
-    /**
-     * 解析旧数据文件路径（逻辑与旧版 DiaryRepository 保持一致）：
-     * 配置支持绝对路径；相对路径优先相对运行目录，运行目录是 backend 时再找上一级项目根目录。
-     */
     private Path resolveDataFilePath() {
         Path configured = Paths.get(dataFilePathConfig);
         if (configured.isAbsolute()) {

@@ -67,6 +67,12 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-pool2</artifactId>
         </dependency>
+
+        <!-- Spring Security Crypto：BCrypt 密码加密 -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-crypto</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

@@ -12,6 +12,9 @@ public class Diary {
     /** 日记唯一ID（UUID格式，系统自动生成） */
     private String id;
 
+    /** 所属用户ID */
+    private String userId;
+
     /** 日记标题 */
     private String title;
 
@@ -42,10 +45,11 @@ public class Diary {
     /**
      * 新建日记时使用的构造方法（自动生成 ID 和创建时间）
      */
-    public static Diary createNew(String title, String content,
+    public static Diary createNew(String userId, String title, String content,
                                    List<String> tags, String weather, String mood) {
         Diary diary = new Diary();
         diary.setId(UUID.randomUUID().toString());
+        diary.setUserId(userId);
         diary.setTitle(title);
         diary.setContent(content);
         diary.setTags(tags != null ? tags : List.of());
@@ -65,6 +69,14 @@ public class Diary {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public String getTitle() {

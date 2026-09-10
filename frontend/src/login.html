@@ -10,14 +10,20 @@
         <div class="login-card">
             <div class="login-logo">📔</div>
             <h1 class="login-title">欧托留日记</h1>
-            <p class="login-subtitle">请输入密码登录</p>
+            <p class="login-subtitle">手机号 + 密码 登录</p>
 
             <div class="login-form">
+                <div class="login-field">
+                    <input type="tel" id="phoneInput" placeholder="请输入手机号" maxlength="11" autocomplete="off">
+                </div>
                 <div class="login-field">
                     <input type="password" id="passwordInput" placeholder="请输入密码" autocomplete="off">
                 </div>
                 <div class="login-error" id="loginError"></div>
                 <button type="button" class="btn btn-primary login-btn" id="loginBtn">登录</button>
+                <div class="login-links">
+                    <a href="register.html">还没有账号？去注册</a>
+                </div>
             </div>
         </div>
     </div>

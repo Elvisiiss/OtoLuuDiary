@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>注册 - 欧托留日记</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="login-wrap">
+        <div class="login-card">
+            <div class="login-logo">📔</div>
+            <h1 class="login-title">注册账号</h1>
+            <p class="login-subtitle">创建你的欧托留日记账号</p>
+
+            <div class="login-form">
+                <div class="login-field">
+                    <input type="tel" id="phoneInput" placeholder="手机号" maxlength="11" autocomplete="off">
+                </div>
+                <div class="login-field">
+                    <input type="text" id="nicknameInput" placeholder="昵称（选填）" maxlength="20" autocomplete="off">
+                </div>
+                <div class="login-field">
+                    <input type="password" id="passwordInput" placeholder="密码（至少6位）" autocomplete="off">
+                </div>
+                <div class="login-field">
+                    <input type="password" id="confirmInput" placeholder="确认密码" autocomplete="off">
+                </div>
+                <div class="login-error" id="registerError"></div>
+                <button type="button" class="btn btn-primary login-btn" id="registerBtn">注册</button>
+                <div class="login-links">
+                    <a href="login.html">已有账号？去登录</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/register.js"></script>
+</body>
+</html>
