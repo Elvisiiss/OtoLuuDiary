@@ -1,0 +1,72 @@
+# ============================================
+# OtoLuuDiary 后端配置文件
+# ============================================
+
+server:
+  # 服务端口
+  port: 8080
+  servlet:
+    # 服务上下文路径（所有 API 前缀）
+    context-path: /api
+
+spring:
+  datasource:
+    # 数据库地址：数据库名使用 otoluudiary；不存在时自动创建
+    url: jdbc:mysql://110.42.193.119:31101/otoluudiary?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&characterEncoding=utf8
+    username: root
+    password: 2rJyDpZwTrbkWWjB
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    # Hikari 连接池
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+  data:
+    redis:
+      host: 110.42.193.119
+      port: 31102
+      database: 4
+      password: wMS2NC8Ff2pSYFZE
+      timeout: 10s
+      lettuce:
+        pool:
+          min-idle: 0
+          max-idle: 8
+          max-active: 8
+          max-wait: -1ms
+  # 启动时自动执行 classpath 下的 schema.sql 建表（CREATE TABLE IF NOT EXISTS，可重复执行）
+  sql:
+    init:
+      mode: always
+      encoding: UTF-8
+
+# MyBatis 配置
+mybatis:
+  # Mapper XML 文件位置
+  mapper-locations: classpath:mapper/*.xml
+  configuration:
+    # 数据库下划线字段（created_at）自动映射 Java 驼峰属性（createdAt）
+    map-underscore-to-camel-case: true
+  # 自定义类型处理器所在包（List<String> <-> JSON）
+  type-handlers-package: com.otoluudiary.handler
+
+# 业务配置
+otoluudiary:
+  # 旧 TXT 数据文件路径（仅首次启动时用于把历史数据导入 MySQL，之后不再使用）
+  data:
+    file: ../data/diaries.txt
+  # 认证配置
+  auth:
+    # 登录密码（生产环境请修改！）
+    password: "123456"
+    # Token 有效期（小时）
+    token-expire-hours: 72
+
+# 日志配置
+logging:
+  level:
+    com:
+      otoluudiary: INFO
+      # 打印 Mapper 执行的 SQL（开发调试方便；不想看 SQL 可改成 INFO）
+      otoluudiary.mapper: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"

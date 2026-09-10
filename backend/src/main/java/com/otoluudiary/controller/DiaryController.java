@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * 日记 REST API 接口层
  *
- * 全部接口前缀：/api （由 application.properties 中 context-path 配置）
+ * 全部接口前缀：/api （由 application.yml 中 context-path 配置）
  *
  * 接口清单：
  *   GET    /diaries                  全部日记列表
