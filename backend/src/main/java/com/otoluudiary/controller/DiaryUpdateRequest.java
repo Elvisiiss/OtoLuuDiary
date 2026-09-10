@@ -14,6 +14,9 @@ public class DiaryUpdateRequest {
     private String weather;
     private String mood;
 
+    /** 日记日期（可选，毫秒时间戳） */
+    private Long diaryDate;
+
     // ========== Getter / Setter ==========
 
     public String getTitle() {
@@ -54,5 +57,13 @@ public class DiaryUpdateRequest {
 
     public void setMood(String mood) {
         this.mood = mood;
+    }
+
+    public Long getDiaryDate() {
+        return diaryDate;
+    }
+
+    public void setDiaryDate(Long diaryDate) {
+        this.diaryDate = diaryDate;
     }
 }

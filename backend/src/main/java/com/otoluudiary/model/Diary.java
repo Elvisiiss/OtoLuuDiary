@@ -30,6 +30,9 @@ public class Diary {
     /** 心情（可选），如 "开心"、"平静" */
     private String mood;
 
+    /** 日记日期（当天0点毫秒时间戳，由用户选择或按4:00规则默认） */
+    private Long diaryDate;
+
     /** 创建时间（毫秒时间戳，系统自动生成） */
     private Long createdAt;
 
@@ -46,7 +49,8 @@ public class Diary {
      * 新建日记时使用的构造方法（自动生成 ID 和创建时间）
      */
     public static Diary createNew(String userId, String title, String content,
-                                   List<String> tags, String weather, String mood) {
+                                   List<String> tags, String weather, String mood,
+                                   Long diaryDate) {
         Diary diary = new Diary();
         diary.setId(UUID.randomUUID().toString());
         diary.setUserId(userId);
@@ -55,6 +59,7 @@ public class Diary {
         diary.setTags(tags != null ? tags : List.of());
         diary.setWeather(weather);
         diary.setMood(mood);
+        diary.setDiaryDate(diaryDate);
         long now = System.currentTimeMillis();
         diary.setCreatedAt(now);
         diary.setUpdatedAt(now);
@@ -117,6 +122,14 @@ public class Diary {
 
     public void setMood(String mood) {
         this.mood = mood;
+    }
+
+    public Long getDiaryDate() {
+        return diaryDate;
+    }
+
+    public void setDiaryDate(Long diaryDate) {
+        this.diaryDate = diaryDate;
     }
 
     public Long getCreatedAt() {

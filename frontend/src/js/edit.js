@@ -44,6 +44,40 @@
         return str.split(/[,，\s]+/).map(s => s.trim()).filter(Boolean);
     }
 
+    /**
+     * 计算默认日记日期（凌晨4:00前算昨天，4:00及以后算今天）
+     * 返回 Date 对象（当天0点）
+     */
+    function getDefaultDiaryDate() {
+        var now = new Date();
+        var d = new Date(now);
+        if (now.getHours() < 4) {
+            d.setDate(d.getDate() - 1);
+        }
+        d.setHours(0, 0, 0, 0);
+        return d;
+    }
+
+    /** Date 对象 → 'YYYY-MM-DD'（用于 date input） */
+    function formatDateForInput(d) {
+        var pad = function (n) { return n < 10 ? '0' + n : '' + n; };
+        return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+    }
+
+    /** 'YYYY-MM-DD' → 当天0点的毫秒时间戳 */
+    function dateStrToTimestamp(dateStr) {
+        if (!dateStr) return null;
+        var parts = dateStr.split('-');
+        var d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]), 0, 0, 0, 0);
+        return d.getTime();
+    }
+
+    /** 毫秒时间戳 → 'YYYY-MM-DD' */
+    function timestampToDateStr(ts) {
+        if (!ts) return '';
+        return formatDateForInput(new Date(ts));
+    }
+
     // ========== 表单操作 ==========
 
     function setFormValue(diary) {
@@ -52,15 +86,21 @@
         document.getElementById('weather').value = diary.weather || '';
         document.getElementById('mood').value = diary.mood || '';
         document.getElementById('tags').value = (diary.tags || []).join(', ');
+        // 编辑模式：显示已有的日记日期；没有则用 createdAt 兜底
+        if (diary.diaryDate || diary.createdAt) {
+            document.getElementById('diaryDate').value = timestampToDateStr(diary.diaryDate || diary.createdAt);
+        }
     }
 
     function getFormValue() {
+        var dateStr = document.getElementById('diaryDate').value;
         return {
-            title:   document.getElementById('title').value.trim(),
-            content: document.getElementById('content').value,
-            weather: document.getElementById('weather').value.trim() || null,
-            mood:    document.getElementById('mood').value.trim() || null,
-            tags:    parseTagsInput(document.getElementById('tags').value)
+            title:     document.getElementById('title').value.trim(),
+            content:   document.getElementById('content').value,
+            weather:   document.getElementById('weather').value.trim() || null,
+            mood:      document.getElementById('mood').value.trim() || null,
+            tags:      parseTagsInput(document.getElementById('tags').value),
+            diaryDate: dateStrToTimestamp(dateStr)
         };
     }
 
@@ -135,6 +175,8 @@
             isEditMode = false;
             document.getElementById('pageTitle').textContent = '写新日记';
             document.getElementById('saveBtn').textContent = '保存';
+            // 新建日记：按4:00规则设置默认日期
+            document.getElementById('diaryDate').value = formatDateForInput(getDefaultDiaryDate());
         }
 
         // 返回按钮

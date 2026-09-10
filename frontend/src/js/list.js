@@ -13,13 +13,12 @@
 
     // ========== 工具函数 ==========
 
-    /** 时间戳 → 友好日期字符串 */
+    /** 时间戳 → 日期字符串（仅日期，不显示时间） */
     function formatDate(ts) {
         if (!ts) return '';
         const d = new Date(ts);
         const pad = n => n.toString().padStart(2, '0');
-        return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate())
-             + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+        return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
     }
 
     /** 弹出提示 */
@@ -72,7 +71,7 @@
                   ).join('') + '</div>'
                 : '';
             const meta = [];
-            meta.push(`<span class="meta-time">${formatDate(d.createdAt)}</span>`);
+            meta.push(`<span class="meta-time">${formatDate(d.diaryDate || d.createdAt)}</span>`);
             if (d.weather) meta.push(`<span class="meta-weather">${escapeHtml(d.weather)}</span>`);
             if (d.mood)    meta.push(`<span class="meta-mood">${escapeHtml(d.mood)}</span>`);
 

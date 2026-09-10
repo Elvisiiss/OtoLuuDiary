@@ -38,6 +38,8 @@ spring:
     init:
       mode: always
       encoding: UTF-8
+      # ALTER TABLE 重复执行会报错，开启此项保证启动不中断
+      continue-on-error: true
 
 # MyBatis 配置
 mybatis:

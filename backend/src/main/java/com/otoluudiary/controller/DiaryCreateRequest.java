@@ -23,6 +23,9 @@ public class DiaryCreateRequest {
     /** 心情（可选） */
     private String mood;
 
+    /** 日记日期（可选，毫秒时间戳，不传则后端按4:00规则默认） */
+    private Long diaryDate;
+
     // ========== 校验：必填字段 ==========
     public boolean isValid() {
         return title != null && !title.trim().isEmpty()
@@ -75,5 +78,13 @@ public class DiaryCreateRequest {
 
     public void setMood(String mood) {
         this.mood = mood;
+    }
+
+    public Long getDiaryDate() {
+        return diaryDate;
+    }
+
+    public void setDiaryDate(Long diaryDate) {
+        this.diaryDate = diaryDate;
     }
 }

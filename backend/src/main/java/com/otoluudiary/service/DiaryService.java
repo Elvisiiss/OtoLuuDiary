@@ -7,6 +7,8 @@ import com.otoluudiary.model.Diary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 
 /**
@@ -34,16 +36,34 @@ public class DiaryService {
 
     /** 新增日记 */
     public Diary create(String userId, DiaryCreateRequest req) {
+        Long diaryDate = req.getDiaryDate();
+        // 前端未传 diaryDate 时，后端按4:00规则兜底（使用服务器本地时区）
+        if (diaryDate == null) {
+            diaryDate = computeDefaultDiaryDate();
+        }
         Diary diary = Diary.createNew(
                 userId,
                 req.getTitle(),
                 req.getContent(),
                 req.getTags(),
                 req.getWeather(),
-                req.getMood()
+                req.getMood(),
+                diaryDate
         );
         diaryMapper.insert(diary);
         return diary;
+    }
+
+    /**
+     * 计算默认日记日期：凌晨4:00前算昨天，4:00及以后算今天
+     * 返回当天0点的毫秒时间戳
+     */
+    private long computeDefaultDiaryDate() {
+        java.time.LocalDateTime now = java.time.LocalDateTime.now();
+        LocalDate target = (now.getHour() < 4)
+                ? now.toLocalDate().minusDays(1)
+                : now.toLocalDate();
+        return target.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
     }
 
     /**
@@ -60,6 +80,7 @@ public class DiaryService {
         if (req.getTags() != null) existing.setTags(req.getTags());
         if (req.getWeather() != null) existing.setWeather(req.getWeather());
         if (req.getMood() != null) existing.setMood(req.getMood());
+        if (req.getDiaryDate() != null) existing.setDiaryDate(req.getDiaryDate());
         existing.setUpdatedAt(System.currentTimeMillis());
         diaryMapper.update(existing);
         return existing;

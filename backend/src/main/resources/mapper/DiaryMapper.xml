@@ -13,12 +13,13 @@
                 typeHandler="com.otoluudiary.handler.JsonStringListTypeHandler"/>
         <result property="weather"   column="weather"/>
         <result property="mood"      column="mood"/>
+        <result property="diaryDate" column="diary_date"/>
         <result property="createdAt" column="created_at"/>
         <result property="updatedAt" column="updated_at"/>
     </resultMap>
 
     <sql id="diaryColumns">
-        id, user_id, title, content, tags, weather, mood, created_at, updated_at
+        id, user_id, title, content, tags, weather, mood, diary_date, created_at, updated_at
     </sql>
 
     <!-- 查询指定用户的全部日记 -->
@@ -26,7 +27,7 @@
         SELECT <include refid="diaryColumns"/>
         FROM diary
         WHERE user_id = #{userId}
-        ORDER BY created_at DESC
+        ORDER BY COALESCE(diary_date, created_at) DESC
     </select>
 
     <select id="findById" resultMap="diaryResultMap">
@@ -36,7 +37,7 @@
     </select>
 
     <insert id="insert">
-        INSERT INTO diary (id, user_id, title, content, tags, weather, mood, created_at, updated_at)
+        INSERT INTO diary (id, user_id, title, content, tags, weather, mood, diary_date, created_at, updated_at)
         VALUES (
             #{id},
             #{userId},
@@ -45,6 +46,7 @@
             #{tags, typeHandler=com.otoluudiary.handler.JsonStringListTypeHandler},
             #{weather},
             #{mood},
+            #{diaryDate},
             #{createdAt},
             #{updatedAt}
         )
@@ -57,6 +59,7 @@
             tags       = #{tags, typeHandler=com.otoluudiary.handler.JsonStringListTypeHandler},
             weather    = #{weather},
             mood       = #{mood},
+            diary_date = #{diaryDate},
             updated_at = #{updatedAt}
         WHERE id = #{id}
     </update>
@@ -75,7 +78,7 @@
             AND (title LIKE CONCAT('%', #{keyword}, '%')
                  OR content LIKE CONCAT('%', #{keyword}, '%'))
         </if>
-        ORDER BY created_at DESC
+        ORDER BY COALESCE(diary_date, created_at) DESC
     </select>
 
     <!-- 按标签筛选：限定用户 -->
@@ -86,7 +89,7 @@
         <if test="tag != null and tag != ''">
             AND LOWER(CAST(tags AS CHAR)) LIKE CONCAT('%"', LOWER(#{tag}), '"%')
         </if>
-        ORDER BY created_at DESC
+        ORDER BY COALESCE(diary_date, created_at) DESC
     </select>
 
     <!-- 指定用户的全部标签 -->

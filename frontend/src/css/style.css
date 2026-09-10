@@ -330,6 +330,7 @@ body {
     transition: border 0.2s;
 }
 .form-item input[type="text"]:focus,
+.form-item input[type="date"]:focus,
 .form-item textarea:focus {
     border-color: var(--primary);
 }
