@@ -56,48 +56,52 @@ body {
 .layout { display: flex; min-height: 100vh; }
 
 .sidebar {
-    width: 240px;
+    width: 200px;
     background-color: #fff;
     border-right: 1px solid var(--border);
-    padding: 24px 18px;
+    padding: 20px 0;
     display: flex;
     flex-direction: column;
-    gap: 22px;
 }
 .app-title {
-    font-size: 20px; font-weight: 700; color: var(--primary-dark);
+    font-size: 18px; font-weight: 700; color: var(--primary-dark);
     display: flex; align-items: center; gap: 8px;
+    padding: 0 20px 20px; border-bottom: 1px solid var(--border);
 }
-.app-title::before { content: "📔"; font-size: 22px; }
+.app-title::before { content: "📔"; font-size: 20px; }
 
-.search-box input {
-    width: 100%; padding: 9px 12px; border: 1px solid var(--border);
-    border-radius: 6px; font-size: 14px; outline: none; transition: border 0.2s;
+/* 左侧导航菜单 */
+.nav-menu { flex: 1; padding: 12px 0; }
+.nav-item {
+    padding: 12px 20px; font-size: 14px; color: var(--text-sub);
+    cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 6px;
 }
-.search-box input:focus { border-color: var(--primary); }
-
-.section-title {
-    font-size: 13px; color: var(--text-sub); margin-bottom: 10px;
-    display: flex; justify-content: space-between; align-items: center;
+.nav-item:hover { background: #f5f7fb; color: var(--text-main); }
+.nav-item.active {
+    background: linear-gradient(90deg, #eef2ff, transparent);
+    color: var(--primary); font-weight: 600; border-right: 3px solid var(--primary);
 }
-.section-title .clear-tag { cursor: pointer; color: var(--primary); font-size: 12px; }
-.section-title .clear-tag:hover { text-decoration: underline; }
-
-.tag-list { display: flex; flex-wrap: wrap; gap: 6px; }
-.tag-chip {
-    display: inline-block; padding: 4px 10px; background-color: var(--tag-bg);
-    color: var(--tag-text); border-radius: 12px; font-size: 12px;
-    cursor: pointer; transition: all 0.2s;
-}
-.tag-chip:hover, .tag-chip.active { background-color: var(--primary); color: #fff; }
 
 .main { flex: 1; padding: 24px 30px; overflow-y: auto; }
 .main-header {
-    display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px;
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;
 }
+.header-left { display: flex; align-items: center; gap: 20px; }
 .main-header h1 { font-size: 22px; color: var(--text-main); }
-.status-tip { font-size: 13px; color: var(--text-sub); margin-top: 6px; }
+
+/* 内联搜索框 */
+.search-inline input {
+    padding: 7px 14px; border: 1px solid var(--border); border-radius: 6px;
+    font-size: 13px; outline: none; width: 220px; transition: border 0.2s, width 0.2s;
+}
+.search-inline input:focus { border-color: var(--primary); width: 280px; }
+
+.status-tip { font-size: 13px; color: var(--text-sub); margin-bottom: 14px; }
 .status-tip.error { color: var(--danger); }
+
+/* 页面面板切换 */
+.page-panel { display: none; }
+.page-panel.active { display: block; }
 
 .diary-list { display: flex; flex-direction: column; gap: 14px; }
 .diary-card {
@@ -134,6 +138,151 @@ body {
 .empty-state .big-icon { font-size: 60px; margin-bottom: 16px; opacity: 0.6; }
 .empty-state h3 { font-size: 18px; margin-bottom: 8px; color: var(--text-main); }
 .empty-state p { margin-bottom: 20px; }
+
+/* ============== 待做清单 ============== */
+.todo-filters {
+    display: flex; gap: 8px; margin-bottom: 16px;
+}
+.todo-filter {
+    padding: 5px 14px; border-radius: 14px; font-size: 13px;
+    color: var(--text-sub); cursor: pointer; transition: all 0.15s;
+    background: #fff; border: 1px solid var(--border);
+}
+.todo-filter:hover { border-color: var(--primary); color: var(--primary); }
+.todo-filter.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+.todo-list { display: flex; flex-direction: column; gap: 8px; }
+.todo-item {
+    display: flex; align-items: center; gap: 12px;
+    background: #fff; border-radius: 8px; padding: 12px 16px;
+    box-shadow: var(--shadow); transition: transform 0.15s;
+}
+.todo-item:hover { transform: translateY(-1px); }
+.todo-check {
+    width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--border);
+    cursor: pointer; flex-shrink: 0; transition: all 0.15s;
+    display: flex; align-items: center; justify-content: center;
+}
+.todo-check:hover { border-color: var(--primary); }
+.todo-check.done { background: var(--success); border-color: var(--success); }
+.todo-check.done::after { content: "✓"; color: #fff; font-size: 12px; font-weight: 700; }
+.todo-text { flex: 1; font-size: 14px; }
+.todo-text.done { text-decoration: line-through; color: var(--text-sub); }
+.todo-badge {
+    font-size: 11px; padding: 2px 8px; border-radius: 10px;
+    background: #f0f4ff; color: var(--primary);
+}
+.todo-badge.repeat { background: #fff7ed; color: #c27a30; }
+.todo-badge.important { background: #fef2f2; color: var(--danger); }
+.todo-due { font-size: 12px; color: var(--text-sub); }
+.todo-due.overdue { color: var(--danger); }
+.todo-actions { display: flex; gap: 4px; }
+.todo-actions button {
+    background: none; border: none; cursor: pointer; font-size: 16px;
+    color: var(--text-sub); padding: 2px 6px; border-radius: 4px; transition: all 0.15s;
+}
+.todo-actions button:hover { background: #f0f3fa; color: var(--danger); }
+
+/* ============== 计划月历 ============== */
+.calendar-nav { display: flex; align-items: center; gap: 12px; }
+.calendar-nav span { font-size: 16px; font-weight: 600; min-width: 100px; text-align: center; }
+
+.calendar-grid {
+    display: grid; grid-template-columns: repeat(7, 1fr);
+    gap: 1px; background: var(--border); border-radius: 10px; overflow: hidden;
+    box-shadow: var(--shadow);
+}
+.cal-header {
+    background: #f5f7fb; padding: 10px; text-align: center;
+    font-size: 13px; font-weight: 600; color: var(--text-sub);
+}
+.cal-cell {
+    background: #fff; min-height: 100px; padding: 8px;
+    cursor: pointer; transition: background 0.15s; position: relative;
+}
+.cal-cell:hover { background: #f8faff; }
+.cal-cell.other-month { background: #fafbfd; color: #ccc; }
+.cal-cell.today { box-shadow: inset 0 0 0 2px var(--primary); }
+.cal-day { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+.cal-plans { display: flex; flex-direction: column; gap: 2px; }
+.cal-plan {
+    font-size: 11px; padding: 2px 5px; border-radius: 3px;
+    background: #eef2ff; color: var(--primary); white-space: nowrap;
+    overflow: hidden; text-overflow: ellipsis;
+}
+.cal-add {
+    font-size: 11px; color: var(--text-sub); opacity: 0; transition: opacity 0.15s;
+    position: absolute; bottom: 4px; right: 6px;
+}
+.cal-cell:hover .cal-add { opacity: 1; }
+
+/* ============== 日程表（课程表样式） ============== */
+.schedule-table-wrap { overflow-x: auto; }
+.schedule-table {
+    width: 100%; border-collapse: collapse; background: #fff;
+    border-radius: 10px; overflow: hidden; box-shadow: var(--shadow);
+}
+.schedule-table th {
+    background: #f5f7fb; padding: 12px 8px; font-size: 13px;
+    font-weight: 600; color: var(--text-sub); text-align: center;
+    border-bottom: 1px solid var(--border);
+}
+.schedule-table td {
+    border: 1px solid var(--border); padding: 6px; vertical-align: top;
+    min-width: 90px; min-height: 50px; font-size: 12px; position: relative;
+}
+.schedule-table td:first-child {
+    background: #f9fafb; font-weight: 600; color: var(--text-sub);
+    text-align: center; font-size: 11px; min-width: 70px; white-space: nowrap;
+}
+.schedule-item {
+    background: linear-gradient(135deg, #eef2ff, #e8edff);
+    border-radius: 6px; padding: 6px 8px; margin-bottom: 4px;
+    border-left: 3px solid var(--primary);
+}
+.schedule-item .s-name { font-weight: 600; color: var(--text-main); }
+.schedule-item .s-loc { font-size: 11px; color: var(--text-sub); margin-top: 2px; }
+.schedule-item .s-del {
+    position: absolute; top: 2px; right: 4px; font-size: 14px;
+    color: var(--text-sub); cursor: pointer; opacity: 0; transition: opacity 0.15s;
+}
+.schedule-item:hover .s-del { opacity: 1; }
+
+/* ============== 弹窗（Modal） ============== */
+.modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.35);
+    z-index: 1000; display: flex; align-items: center; justify-content: center;
+}
+.modal {
+    background: #fff; border-radius: 14px; width: 400px; max-width: 90vw;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+    animation: modalIn 0.2s ease;
+}
+@keyframes modalIn { from { transform: scale(0.95) translateY(10px); opacity: 0; } }
+.modal-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 18px 24px; border-bottom: 1px solid var(--border);
+    font-size: 16px; font-weight: 600;
+}
+.modal-close {
+    cursor: pointer; font-size: 18px; color: var(--text-sub);
+    width: 28px; height: 28px; display: flex; align-items: center;
+    justify-content: center; border-radius: 50%; transition: background 0.15s;
+}
+.modal-close:hover { background: var(--bg); }
+.modal-body { padding: 20px 24px; }
+.modal-footer {
+    padding: 14px 24px; border-top: 1px solid var(--border);
+    display: flex; gap: 8px; justify-content: flex-end;
+}
+.form-field { margin-bottom: 14px; }
+.form-field label { display: block; font-size: 13px; color: var(--text-sub); margin-bottom: 4px; font-weight: 500; }
+.form-field input, .form-field select {
+    width: 100%; padding: 8px 12px; border: 1px solid var(--border);
+    border-radius: 6px; font-size: 14px; outline: none; transition: border 0.2s;
+}
+.form-field input:focus, .form-field select:focus { border-color: var(--primary); }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
 /* ============== 提示消息（toast） ============== */
 .toast {

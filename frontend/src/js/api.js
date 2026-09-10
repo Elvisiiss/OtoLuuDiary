@@ -107,6 +107,7 @@ var AuthApi = {
 // ============ 日记接口 ============
 
 var DiaryApi = {
+    request: function(path, options) { return request(path, options); },
     listAll: function() { return request('/diaries', { method: 'GET' }); },
     getById: function(id) { return request('/diaries/' + encodeURIComponent(id), { method: 'GET' }); },
     create: function(body) { return request('/diaries', { method: 'POST', body: body }); },

@@ -7,22 +7,15 @@
 </head>
 <body>
     <div class="layout">
-        <!-- 左侧边栏 -->
+        <!-- 左侧导航栏 -->
         <aside class="sidebar">
             <div class="app-title">欧托留日记</div>
-
-            <div class="search-box">
-                <input type="text" id="searchInput" placeholder="🔍 搜索标题或正文...">
-            </div>
-
-            <div class="tag-section">
-                <div class="section-title">
-                    <span>🏷️ 标签</span>
-                    <span id="clearTag" class="clear-tag" style="display:none;">清除</span>
-                </div>
-                <div class="tag-list" id="tagList">加载中...</div>
-            </div>
-
+            <nav class="nav-menu">
+                <div class="nav-item active" data-page="diary">📖 我的日记</div>
+                <div class="nav-item" data-page="todo">✅ 待做清单</div>
+                <div class="nav-item" data-page="calendar">📅 计划月历</div>
+                <div class="nav-item" data-page="schedule">📋 日程表</div>
+            </nav>
             <div class="sidebar-footer">
                 <div class="user-info" id="userInfo">加载中...</div>
                 <button type="button" class="btn btn-default btn-logout" id="logoutBtn">🚪 退出登录</button>
@@ -31,18 +24,177 @@
 
         <!-- 右侧主内容 -->
         <main class="main">
-            <div class="main-header">
-                <div>
-                    <h1>我的日记</h1>
-                    <div class="status-tip" id="statusTip">加载中...</div>
+            <!-- ===== 我的日记 ===== -->
+            <div class="page-panel active" id="pageDiary">
+                <div class="main-header">
+                    <div class="header-left">
+                        <h1>我的日记</h1>
+                        <div class="search-inline">
+                            <input type="text" id="searchInput" placeholder="🔍 搜索标题或正文...">
+                        </div>
+                    </div>
+                    <a href="edit.html" class="btn btn-primary">✏️ 写日记</a>
                 </div>
-                <a href="edit.html" class="btn btn-primary">✏️ 写日记</a>
+                <div class="status-tip" id="statusTip">加载中...</div>
+                <div class="diary-list" id="diaryList"></div>
             </div>
 
-            <div class="diary-list" id="diaryList">
-                <!-- 动态渲染 -->
+            <!-- ===== 待做清单 ===== -->
+            <div class="page-panel" id="pageTodo">
+                <div class="main-header">
+                    <div class="header-left">
+                        <h1>待做清单</h1>
+                    </div>
+                    <button class="btn btn-primary" id="addTodoBtn">➕ 新增待做</button>
+                </div>
+                <div class="todo-filters">
+                    <span class="todo-filter active" data-filter="all">全部</span>
+                    <span class="todo-filter" data-filter="today">今天</span>
+                    <span class="todo-filter" data-filter="week">本周</span>
+                    <span class="todo-filter" data-filter="important">重要</span>
+                </div>
+                <div class="todo-list" id="todoList"></div>
+            </div>
+
+            <!-- ===== 计划月历 ===== -->
+            <div class="page-panel" id="pageCalendar">
+                <div class="main-header">
+                    <div class="header-left">
+                        <h1>计划月历</h1>
+                    </div>
+                    <div class="calendar-nav">
+                        <button class="btn btn-default btn-sm" id="calPrev">◀</button>
+                        <span id="calMonth">2026年9月</span>
+                        <button class="btn btn-default btn-sm" id="calNext">▶</button>
+                    </div>
+                </div>
+                <div class="calendar-grid" id="calendarGrid"></div>
+            </div>
+
+            <!-- ===== 日程表 ===== -->
+            <div class="page-panel" id="pageSchedule">
+                <div class="main-header">
+                    <div class="header-left">
+                        <h1>日程表</h1>
+                    </div>
+                    <button class="btn btn-primary" id="addScheduleBtn">➕ 新增日程</button>
+                </div>
+                <div class="schedule-table-wrap">
+                    <table class="schedule-table" id="scheduleTable">
+                        <thead>
+                            <tr>
+                                <th>时间</th>
+                                <th>周一</th>
+                                <th>周二</th>
+                                <th>周三</th>
+                                <th>周四</th>
+                                <th>周五</th>
+                                <th>周六</th>
+                                <th>周日</th>
+                            </tr>
+                        </thead>
+                        <tbody id="scheduleBody"></tbody>
+                    </table>
+                </div>
             </div>
         </main>
+    </div>
+
+    <!-- 待做清单弹窗 -->
+    <div class="modal-overlay" id="todoModal" style="display:none;">
+        <div class="modal">
+            <div class="modal-header">
+                <span id="todoModalTitle">新增待做</span>
+                <span class="modal-close" id="todoModalClose">✕</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-field">
+                    <label>内容</label>
+                    <input type="text" id="todoContent" placeholder="要做什么..." maxlength="200">
+                </div>
+                <div class="form-row">
+                    <div class="form-field">
+                        <label>重要度</label>
+                        <div class="importance-picker" id="todoImportance">
+                            <span class="star" data-val="1">★</span>
+                            <span class="star" data-val="2">★</span>
+                            <span class="star" data-val="3">★</span>
+                        </div>
+                    </div>
+                    <div class="form-field">
+                        <label>循环</label>
+                        <select id="todoRepeat">
+                            <option value="">不循环</option>
+                            <option value="daily">每天</option>
+                            <option value="weekday">工作日</option>
+                            <option value="weekly">每周</option>
+                            <option value="monthly">每月</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-field">
+                    <label>截止日期（可选）</label>
+                    <input type="date" id="todoDueDate">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" id="todoModalCancel">取消</button>
+                <button class="btn btn-primary" id="todoModalSave">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 日程表弹窗 -->
+    <div class="modal-overlay" id="scheduleModal" style="display:none;">
+        <div class="modal">
+            <div class="modal-header">
+                <span>新增日程</span>
+                <span class="modal-close" id="scheduleModalClose">✕</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-field">
+                    <label>名称</label>
+                    <input type="text" id="scheduleName" placeholder="课程/事项名称" maxlength="50">
+                </div>
+                <div class="form-row">
+                    <div class="form-field">
+                        <label>星期</label>
+                        <select id="scheduleDay">
+                            <option value="1">周一</option>
+                            <option value="2">周二</option>
+                            <option value="3">周三</option>
+                            <option value="4">周四</option>
+                            <option value="5">周五</option>
+                            <option value="6">周六</option>
+                            <option value="7">周日</option>
+                        </select>
+                    </div>
+                    <div class="form-field">
+                        <label>时间段</label>
+                        <select id="scheduleSlot">
+                            <option value="1">第1节 (08:00-08:45)</option>
+                            <option value="2">第2节 (08:55-09:40)</option>
+                            <option value="3">第3节 (10:00-10:45)</option>
+                            <option value="4">第4节 (10:55-11:40)</option>
+                            <option value="5">第5节 (14:00-14:45)</option>
+                            <option value="6">第6节 (14:55-15:40)</option>
+                            <option value="7">第7节 (16:00-16:45)</option>
+                            <option value="8">第8节 (16:55-17:40)</option>
+                            <option value="9">第9节 (19:00-19:45)</option>
+                            <option value="10">第10节 (19:55-20:40)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-field">
+                    <label>地点（可选）</label>
+                    <input type="text" id="scheduleLocation" placeholder="教室/地点" maxlength="50">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" id="scheduleModalCancel">取消</button>
+                <button class="btn btn-primary" id="scheduleModalSave">保存</button>
+            </div>
+        </div>
     </div>
 
     <script src="js/api.js"></script>

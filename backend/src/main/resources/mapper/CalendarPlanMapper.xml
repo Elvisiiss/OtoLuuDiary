@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.otoluudiary.mapper.CalendarPlanMapper">
+
+    <resultMap id="planMap" type="com.otoluudiary.model.CalendarPlan">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="planDate" column="plan_date"/>
+        <result property="content" column="content"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
+    <select id="findByUserAndMonth" resultMap="planMap">
+        SELECT * FROM calendar_plan
+        WHERE user_id = #{userId} AND plan_date BETWEEN #{startDate} AND #{endDate}
+        ORDER BY plan_date ASC, created_at ASC
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO calendar_plan (user_id, plan_date, content, created_at)
+        VALUES (#{userId}, #{planDate}, #{content}, #{createdAt})
+    </insert>
+
+    <delete id="deleteById">
+        DELETE FROM calendar_plan WHERE id = #{id}
+    </delete>
+</mapper>
