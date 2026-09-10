@@ -4,13 +4,12 @@
   "description": "欧托留日记 - 前端桌面应用（Electron）",
   "main": "main.js",
   "scripts": {
-    "start": "electron .",
+    "start": "electron --disable-gpu .",
     "start:dev": "electron . --enable-logging"
   },
   "author": "OtoLuuDiary",
   "license": "MIT",
   "devDependencies": {
-    "electron": "^30.0.0"
-  },
-  "dependencies": {}
+    "electron": "^28.3.3"
+  }
 }
