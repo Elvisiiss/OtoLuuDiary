@@ -320,8 +320,6 @@
     // ========== 侧边信息卡片（倾斜插入效果）==========
     function initSideCard() {
         var card = document.getElementById('sideCard');
-        var tab = document.getElementById('sideCardTab');
-        var close = document.getElementById('sideCardClose');
 
         // 点击露出的角 → 飞出展开
         card.addEventListener('click', function(e) {
@@ -331,20 +329,11 @@
             }
         });
 
-        // tab 按钮点击（open 状态下可见）
-        tab.addEventListener('click', function(e) {
-            e.stopPropagation();
-            if (card.classList.contains('open')) {
+        // 点击卡片以外任意地方 → 收起
+        document.addEventListener('click', function(e) {
+            if (card.classList.contains('open') && !card.contains(e.target)) {
                 closeCard();
-            } else {
-                openCard();
             }
-        });
-
-        // 关闭按钮
-        close.addEventListener('click', function(e) {
-            e.stopPropagation();
-            closeCard();
         });
 
         // 初始状态：露出角（倾斜插在右侧）
