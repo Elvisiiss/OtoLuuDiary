@@ -4,134 +4,199 @@
     <meta charset="UTF-8">
     <title>写日记 - 欧托留日记</title>
     <link rel="stylesheet" href="css/style.css">
-    <!-- Quill 富文本编辑器 -->
     <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet">
 </head>
 <body>
-    <div class="edit-wrap">
-        <div class="edit-header">
-            <span id="backBtn" class="back">← 返回列表</span>
-            <h1 id="pageTitle">写日记</h1>
-            <span style="width:80px;"></span>
+    <div class="page-container">
+
+        <!-- 顶栏 -->
+        <div class="top-bar">
+            <span class="top-back" id="backBtn">← 返回</span>
+            <span class="top-title" id="pageTitle">写日记</span>
+            <button class="btn btn-primary btn-sm" id="saveBtn">保存</button>
         </div>
 
-        <div class="edit-form">
-            <!-- 标题 -->
-            <div class="form-item">
-                <label for="title">标题 *</label>
-                <input type="text" id="title" maxlength="100" placeholder="给这篇日记起个标题吧...">
+        <!-- 编辑器区域 -->
+        <div class="editor-area" id="editorArea">
+            <!-- 隐藏的 Quill toolbar（Quill 初始化需要引用） -->
+            <div id="editorToolbar" style="display:none;">
+                <span class="ql-formats">
+                    <select class="ql-header"><option selected></option><option value="1"></option><option value="2"></option><option value="3"></option></select>
+                    <select class="ql-size"><option value="small"></option><option selected></option><option value="large"></option><option value="huge"></option></select>
+                </span>
+                <span class="ql-formats">
+                    <button class="ql-bold"></button><button class="ql-italic"></button><button class="ql-underline"></button><button class="ql-strike"></button>
+                </span>
+                <span class="ql-formats">
+                    <select class="ql-color"></select><select class="ql-background"></select>
+                </span>
+                <span class="ql-formats">
+                    <button class="ql-blockquote"></button><button class="ql-code-block"></button>
+                </span>
+                <span class="ql-formats">
+                    <button class="ql-list" value="ordered"></button><button class="ql-list" value="bullet"></button>
+                </span>
+                <span class="ql-formats">
+                    <button class="ql-image"></button><button class="ql-video"></button><button class="ql-clean"></button>
+                </span>
             </div>
-
-            <!-- 日记日期 -->
-            <div class="form-item">
-                <label for="diaryDate">日记日期</label>
-                <input type="date" id="diaryDate">
+            <div id="editor"></div>
+            <!-- 翻页模式页码 -->
+            <div class="page-indicator" id="pageIndicator" style="display:none;">
+                <button class="page-btn" id="pagePrev">◀</button>
+                <span id="pageNum">1 / 1</span>
+                <button class="page-btn" id="pageNext">▶</button>
             </div>
+        </div>
 
-            <!-- 天气 / 心情 / 标签 -->
-            <div class="form-row">
-                <div class="form-item">
-                    <label for="weather">天气（可选）</label>
-                    <input type="text" id="weather" maxlength="20" placeholder="如：晴 / 小雨">
-                </div>
-                <div class="form-item">
-                    <label for="mood">心情（可选）</label>
-                    <input type="text" id="mood" maxlength="20" placeholder="如：开心 / 平静">
-                </div>
-                <div class="form-item">
-                    <label for="tags">标签（可选，多个用逗号分隔）</label>
-                    <input type="text" id="tags" maxlength="200" placeholder="如：工作, 生活, 旅游">
-                </div>
+        <!-- 右侧信息卡片 -->
+        <div class="side-card" id="sideCard">
+            <div class="side-card-tab" id="sideCardTab">
+                <span class="tab-icon">📋</span>
             </div>
-
-            <!-- 重要度 / 位置 -->
-            <div class="form-row form-row-2col">
-                <div class="form-item">
-                    <label>重要度</label>
-                    <div class="importance-picker" id="importancePicker">
-                        <span class="star" data-val="1">★</span>
-                        <span class="star" data-val="2">★</span>
-                        <span class="star" data-val="3">★</span>
-                        <span class="star" data-val="4">★</span>
-                        <span class="star" data-val="5">★</span>
-                        <span class="importance-clear" id="importanceClear" title="清除">✕</span>
+            <div class="side-card-body">
+                <div class="sc-header">
+                    <span class="sc-title">日记信息</span>
+                    <span class="sc-close" id="sideCardClose">✕</span>
+                </div>
+                <div class="sc-fields">
+                    <div class="sc-field">
+                        <label>标题 <span class="required">*</span></label>
+                        <input type="text" id="title" maxlength="100" placeholder="给日记起个标题...">
+                    </div>
+                    <div class="sc-field">
+                        <label>日期</label>
+                        <input type="date" id="diaryDate">
+                    </div>
+                    <div class="sc-row">
+                        <div class="sc-field">
+                            <label>天气</label>
+                            <input type="text" id="weather" maxlength="20" placeholder="晴">
+                        </div>
+                        <div class="sc-field">
+                            <label>心情</label>
+                            <input type="text" id="mood" maxlength="20" placeholder="开心">
+                        </div>
+                    </div>
+                    <div class="sc-field">
+                        <label>标签</label>
+                        <input type="text" id="tags" maxlength="200" placeholder="逗号分隔">
+                    </div>
+                    <div class="sc-field">
+                        <label>重要度</label>
+                        <div class="importance-picker" id="importancePicker">
+                            <span class="star" data-val="1">★</span>
+                            <span class="star" data-val="2">★</span>
+                            <span class="star" data-val="3">★</span>
+                            <span class="star" data-val="4">★</span>
+                            <span class="star" data-val="5">★</span>
+                            <span class="importance-clear" id="importanceClear" title="清除">✕</span>
+                        </div>
+                    </div>
+                    <div class="sc-field">
+                        <label>位置</label>
+                        <input type="text" id="location" maxlength="200" placeholder="如：北京市朝阳区">
                     </div>
                 </div>
-                <div class="form-item">
-                    <label for="location">位置（可选）</label>
-                    <input type="text" id="location" maxlength="200" placeholder="如：北京市朝阳区">
+                <div class="sc-actions">
+                    <button class="btn btn-default btn-sm" id="cancelBtn">取消</button>
+                    <button class="btn btn-primary btn-sm" id="saveBtnCard">保存</button>
                 </div>
             </div>
+        </div>
 
-            <!-- 背景图片 -->
-            <div class="form-item">
-                <label for="backgroundImage">卡片背景图片URL（可选）</label>
-                <input type="text" id="backgroundImage" maxlength="500" placeholder="粘贴图片链接，让卡片更有氛围感...">
+        <!-- 底部停靠面板 -->
+        <div class="bottom-dock" id="bottomDock">
+            <div class="dock-handle" id="dockHandle">
+                <div class="dock-handle-bar"></div>
+                <span class="dock-handle-hint">上拉展开工具面板</span>
             </div>
-
-            <!-- 正文（Quill 富文本） -->
-            <div class="form-item">
-                <label>正文 *</label>
-                <div id="editorToolbar">
-                    <span class="ql-formats">
-                        <select class="ql-header">
-                            <option selected>正文</option>
-                            <option value="1">标题1</option>
-                            <option value="2">标题2</option>
-                            <option value="3">标题3</option>
-                        </select>
-                    </span>
-                    <span class="ql-formats">
-                        <button class="ql-bold" title="加粗"></button>
-                        <button class="ql-italic" title="斜体"></button>
-                        <button class="ql-underline" title="下划线"></button>
-                        <button class="ql-strike" title="删除线"></button>
-                    </span>
-                    <span class="ql-formats">
-                        <select class="ql-color" title="文字颜色"></select>
-                        <select class="ql-background" title="背景颜色"></select>
-                    </span>
-                    <span class="ql-formats">
-                        <select class="ql-size" title="字号">
-                            <option value="small">小字</option>
-                            <option selected>正文</option>
-                            <option value="large">大字</option>
-                            <option value="huge">超大</option>
-                        </select>
-                    </span>
-                    <span class="ql-formats">
-                        <button class="ql-blockquote" title="引用"></button>
-                        <button class="ql-code-block" title="代码块"></button>
-                    </span>
-                    <span class="ql-formats">
-                        <button class="ql-list" value="ordered" title="有序列表"></button>
-                        <button class="ql-list" value="bullet" title="无序列表"></button>
-                    </span>
-                    <span class="ql-formats">
-                        <button class="ql-image" title="插入图片"></button>
-                        <button class="ql-video" title="插入视频"></button>
-                    </span>
-                    <span class="ql-formats">
-                        <button class="ql-clean" title="清除格式"></button>
-                    </span>
+            <div class="dock-panel">
+                <!-- Tab 切换 -->
+                <div class="dock-tabs">
+                    <span class="dock-tab active" data-tab="format">格式</span>
+                    <span class="dock-tab" data-tab="bg">背景</span>
+                    <span class="dock-tab" data-tab="mode">翻页</span>
                 </div>
-                <div id="editor"></div>
-            </div>
-
-            <!-- 媒体上传区 -->
-            <div class="form-item">
-                <label>上传图片 / 视频</label>
-                <div class="upload-zone" id="uploadZone">
-                    <input type="file" id="fileInput" accept="image/*,video/*" multiple style="display:none;">
-                    <div class="upload-hint">点击或拖拽文件到此处上传</div>
-                    <div class="upload-list" id="uploadList"></div>
+                <!-- 格式面板 -->
+                <div class="dock-content active" data-tab="format">
+                    <div class="fmt-row">
+                        <button class="fmt-btn" data-cmd="bold" title="加粗"><b>B</b></button>
+                        <button class="fmt-btn" data-cmd="italic" title="斜体"><i>I</i></button>
+                        <button class="fmt-btn" data-cmd="underline" title="下划线"><u>U</u></button>
+                        <button class="fmt-btn" data-cmd="strike" title="删除线"><s>S</s></button>
+                    </div>
+                    <div class="fmt-row">
+                        <label class="fmt-label">标题</label>
+                        <button class="fmt-btn fmt-select" data-cmd="header" data-val="">正文</button>
+                        <button class="fmt-btn fmt-select" data-cmd="header" data-val="1">H1</button>
+                        <button class="fmt-btn fmt-select" data-cmd="header" data-val="2">H2</button>
+                        <button class="fmt-btn fmt-select" data-cmd="header" data-val="3">H3</button>
+                    </div>
+                    <div class="fmt-row">
+                        <label class="fmt-label">字号</label>
+                        <button class="fmt-btn fmt-select" data-cmd="size" data-val="small">小</button>
+                        <button class="fmt-btn fmt-select active" data-cmd="size" data-val="">中</button>
+                        <button class="fmt-btn fmt-select" data-cmd="size" data-val="large">大</button>
+                        <button class="fmt-btn fmt-select" data-cmd="size" data-val="huge">特大</button>
+                    </div>
+                    <div class="fmt-row">
+                        <label class="fmt-label">颜色</label>
+                        <input type="color" class="fmt-color" id="textColor" value="#2c3450" title="文字颜色">
+                        <input type="color" class="fmt-color" id="bgColor" value="#ffffff" title="背景颜色">
+                        <button class="fmt-btn" id="applyTextColor" title="应用文字颜色">文字色</button>
+                        <button class="fmt-btn" id="applyBgColor" title="应用背景色">背景色</button>
+                    </div>
+                    <div class="fmt-row">
+                        <button class="fmt-btn" data-cmd="blockquote" title="引用">❝</button>
+                        <button class="fmt-btn" data-cmd="code-block" title="代码块">{ }</button>
+                        <button class="fmt-btn" data-cmd="list" data-val="ordered" title="有序列表">1.</button>
+                        <button class="fmt-btn" data-cmd="list" data-val="bullet" title="无序列表">•</button>
+                        <button class="fmt-btn" data-cmd="clean" title="清除格式">⊘</button>
+                    </div>
+                    <div class="fmt-row">
+                        <button class="fmt-btn fmt-wide" id="insertImageBtn" title="插入图片">🖼 插入图片</button>
+                        <button class="fmt-btn fmt-wide" id="insertVideoBtn" title="插入视频">🎬 插入视频</button>
+                    </div>
                 </div>
-            </div>
-
-            <!-- 操作按钮 -->
-            <div class="form-actions">
-                <button type="button" class="btn btn-default" id="cancelBtn">取消</button>
-                <button type="button" class="btn btn-primary" id="saveBtn">保存</button>
+                <!-- 背景面板 -->
+                <div class="dock-content" data-tab="bg">
+                    <div class="fmt-row">
+                        <label class="fmt-label">预设</label>
+                        <span class="bg-preset" data-bg="#ffffff" style="background:#fff;"></span>
+                        <span class="bg-preset" data-bg="#fdf6ec" style="background:#fdf6ec;"></span>
+                        <span class="bg-preset" data-bg="#f0f7ff" style="background:#f0f7ff;"></span>
+                        <span class="bg-preset" data-bg="#f5f0f7" style="background:#f5f0f7;"></span>
+                        <span class="bg-preset" data-bg="#f0fff5" style="background:#f0fff5;"></span>
+                        <span class="bg-preset" data-bg="#fff8f0" style="background:#fff8f0;"></span>
+                        <span class="bg-preset" data-bg="#2c3450" style="background:#2c3450;"></span>
+                        <span class="bg-preset" data-bg="#1a1a2e" style="background:#1a1a2e;"></span>
+                    </div>
+                    <div class="fmt-row">
+                        <label class="fmt-label">自定义背景图</label>
+                        <input type="text" class="fmt-input" id="bgImageUrl" placeholder="粘贴图片URL...">
+                        <button class="fmt-btn" id="applyBgImage">应用</button>
+                    </div>
+                    <div class="fmt-row">
+                        <button class="fmt-btn fmt-wide" id="clearBg">清除背景</button>
+                    </div>
+                    <div class="bg-note" id="bgScrollNote" style="display:none;">⚠ 滚动模式下不支持自定义背景图</div>
+                </div>
+                <!-- 翻页面板 -->
+                <div class="dock-content" data-tab="mode">
+                    <div class="fmt-row mode-row">
+                        <div class="mode-option active" data-mode="scroll" id="modeScroll">
+                            <div class="mode-icon">↕</div>
+                            <div class="mode-name">滚动模式</div>
+                            <div class="mode-desc">内容连续滚动</div>
+                        </div>
+                        <div class="mode-option" data-mode="page" id="modePage">
+                            <div class="mode-icon">📄</div>
+                            <div class="mode-name">翻页模式</div>
+                            <div class="mode-desc">像翻书一样阅读</div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

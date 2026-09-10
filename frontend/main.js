@@ -32,6 +32,12 @@ function createWindow() {
     // 加载主页面（日记列表页）
     win.loadFile(path.join(__dirname, 'src', 'index.html'));
 
+    // 页面跳转后重新聚焦窗口，解决导航后输入框无法打字的问题
+    win.webContents.on('did-finish-load', () => {
+        win.focus();
+        win.webContents.focus();
+    });
+
     // 开发阶段打开开发者工具，方便调试（上线前可注释掉）
     // win.webContents.openDevTools();
 

@@ -61,6 +61,9 @@ public class DiaryController {
             return ApiResponse.fail(req.validationMessage());
         }
         String userId = getCurrentUserId(request);
+        if (userId == null) {
+            return ApiResponse.fail("用户未登录，无法创建日记");
+        }
         Diary created = diaryService.create(userId, req);
         return ApiResponse.ok("日记创建成功", created);
     }

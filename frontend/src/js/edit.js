@@ -1,253 +1,363 @@
 /* =================================================
    编辑页逻辑（edit.html）
-   支持两种模式：
-     - 新增：URL 无 id 参数
-     - 修改：URL 带 ?id=xxx，先加载再修改
+   全屏沉浸式编辑 + 底部工具面板 + 侧边信息卡片
    ================================================= */
 
 (function () {
     'use strict';
 
-    let currentId = null;
-    let isEditMode = false;
-    let quill = null;        // Quill 编辑器实例
-    let importanceVal = 0;   // 当前重要度 0-5
+    // ========== 状态 ==========
+    var currentId = null;
+    var isEditMode = false;
+    var quill = null;
+    var importanceVal = 0;
+    var viewMode = 'scroll';  // 'scroll' | 'page'
+    var currentPage = 1;
+    var totalPages = 1;
+    var pageHeight = 0;
+    var bgImage = '';  // 当前背景图URL
 
-    // ========== 工具 ==========
-    function escapeHtml(str) {
-        if (str == null) return '';
-        return String(str)
-            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    // ========== 工具函数 ==========
+    function escapeHtml(s) {
+        if (s == null) return '';
+        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+            .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
     }
     function toast(msg, type) {
         type = type || 'info';
-        let el = document.querySelector('.toast');
-        if (!el) {
-            el = document.createElement('div');
-            el.className = 'toast';
-            document.body.appendChild(el);
-        }
-        el.className = 'toast ' + type;
-        el.textContent = msg;
-        void el.offsetWidth;
-        el.classList.add('show');
+        var el = document.querySelector('.toast');
+        if (!el) { el = document.createElement('div'); el.className = 'toast'; document.body.appendChild(el); }
+        el.className = 'toast ' + type; el.textContent = msg;
+        void el.offsetWidth; el.classList.add('show');
         clearTimeout(el._timer);
-        el._timer = setTimeout(() => el.classList.remove('show'), 2200);
+        el._timer = setTimeout(function(){ el.classList.remove('show'); }, 2200);
     }
-    function getQueryParam(name) {
-        const params = new URLSearchParams(location.search);
-        return params.get(name);
-    }
-    function parseTagsInput(str) {
-        if (!str) return [];
-        return str.split(/[,，\s]+/).map(s => s.trim()).filter(Boolean);
+    function getQueryParam(n) { return new URLSearchParams(location.search).get(n); }
+    function parseTagsInput(s) {
+        if (!s) return [];
+        return s.split(/[,，\s]+/).map(function(x){ return x.trim(); }).filter(Boolean);
     }
 
     // ========== 日期工具 ==========
     function getDefaultDiaryDate() {
-        var now = new Date();
-        var d = new Date(now);
-        if (now.getHours() < 4) {
-            d.setDate(d.getDate() - 1);
-        }
-        d.setHours(0, 0, 0, 0);
-        return d;
+        var now = new Date(), d = new Date(now);
+        if (now.getHours() < 4) d.setDate(d.getDate() - 1);
+        d.setHours(0,0,0,0); return d;
     }
     function formatDateForInput(d) {
-        var pad = function (n) { return n < 10 ? '0' + n : '' + n; };
-        return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+        var pad = function(n){ return n<10?'0'+n:''+n; };
+        return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
     }
-    function dateStrToTimestamp(dateStr) {
-        if (!dateStr) return null;
-        var parts = dateStr.split('-');
-        var d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]), 0, 0, 0, 0);
-        return d.getTime();
+    function dateStrToTimestamp(s) {
+        if (!s) return null;
+        var p = s.split('-');
+        return new Date(+p[0],+p[1]-1,+p[2],0,0,0,0).getTime();
     }
     function timestampToDateStr(ts) {
         if (!ts) return '';
         return formatDateForInput(new Date(ts));
     }
 
-    // ========== 重要度选择器 ==========
-    function setImportance(val) {
-        importanceVal = val;
-        var stars = document.querySelectorAll('#importancePicker .star');
-        stars.forEach(function (s) {
-            var v = parseInt(s.getAttribute('data-val'));
-            s.classList.toggle('active', v <= val);
-        });
-    }
-
-    // ========== Quill 编辑器 ==========
+    // ========== Quill 初始化 ==========
     function initQuill() {
         quill = new Quill('#editor', {
             theme: 'snow',
-            modules: {
-                toolbar: '#editorToolbar'
-            },
-            placeholder: '写下今天发生的事...'
-        });
-
-        // 自定义图片上传：点击工具栏图片按钮时，上传到服务器
-        var toolbar = quill.getModule('toolbar');
-        toolbar.addHandler('image', function () {
-            var input = document.createElement('input');
-            input.setAttribute('type', 'file');
-            input.setAttribute('accept', 'image/*');
-            input.click();
-            input.onchange = function () {
-                if (input.files && input.files[0]) {
-                    uploadAndInsertImage(input.files[0]);
-                }
-            };
+            modules: { toolbar: '#editorToolbar' },
+            placeholder: '开始写下今天的思绪...'
         });
     }
 
-    /** 上传图片并插入到编辑器 */
-    async function uploadAndInsertImage(file) {
-        if (!file.type.startsWith('image/')) {
-            toast('仅支持图片文件', 'error');
-            return;
-        }
-        if (file.size > 10 * 1024 * 1024) {
-            toast('图片不能超过 10MB', 'error');
-            return;
-        }
+    // ========== 底部面板 ==========
+    function initBottomDock() {
+        var dock = document.getElementById('bottomDock');
+        var handle = document.getElementById('dockHandle');
+
+        // 拉手点击展开/收起
+        handle.addEventListener('click', function() {
+            dock.classList.toggle('open');
+        });
+
+        // Tab 切换
+        var tabs = document.querySelectorAll('.dock-tab');
+        var contents = document.querySelectorAll('.dock-content');
+        tabs.forEach(function(tab) {
+            tab.addEventListener('click', function() {
+                var target = tab.getAttribute('data-tab');
+                tabs.forEach(function(t){ t.classList.remove('active'); });
+                contents.forEach(function(c){ c.classList.remove('active'); });
+                tab.classList.add('active');
+                document.querySelector('.dock-content[data-tab="'+target+'"]').classList.add('active');
+            });
+        });
+
+        // 格式按钮
+        initFormatButtons();
+
+        // 背景面板
+        initBgPanel();
+
+        // 翻页面板
+        initPageMode();
+    }
+
+    // ========== 格式控制 ==========
+    function initFormatButtons() {
+        // 简单格式按钮（bold, italic, underline, strike, blockquote, code-block, clean）
+        document.querySelectorAll('.fmt-btn[data-cmd]').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var cmd = btn.getAttribute('data-cmd');
+                var val = btn.getAttribute('data-val');
+
+                if (cmd === 'clean') {
+                    quill.removeFormat(quill.getSelection(true));
+                    return;
+                }
+                if (cmd === 'bold' || cmd === 'italic' || cmd === 'underline' || cmd === 'strike') {
+                    var current = quill.getFormat()[cmd];
+                    quill.format(cmd, !current);
+                    btn.classList.toggle('active', !current);
+                    return;
+                }
+                if (cmd === 'blockquote' || cmd === 'code-block') {
+                    var current = quill.getFormat()[cmd];
+                    quill.format(cmd, !current);
+                    btn.classList.toggle('active', !current);
+                    return;
+                }
+                if (cmd === 'header') {
+                    var current = quill.getFormat().header;
+                    var newVal = (current == (val || null)) ? false : (val || false);
+                    quill.format('header', newVal);
+                    // 更新 header 按钮状态
+                    document.querySelectorAll('.fmt-btn[data-cmd="header"]').forEach(function(h) {
+                        h.classList.toggle('active', h.getAttribute('data-val') == (newVal || ''));
+                    });
+                    return;
+                }
+                if (cmd === 'size') {
+                    quill.format('size', val || false);
+                    document.querySelectorAll('.fmt-btn[data-cmd="size"]').forEach(function(s) {
+                        s.classList.toggle('active', s.getAttribute('data-val') === (val || ''));
+                    });
+                    return;
+                }
+                if (cmd === 'list') {
+                    var current = quill.getFormat().list;
+                    quill.format('list', current === val ? false : val);
+                    return;
+                }
+            });
+        });
+
+        // 颜色应用
+        document.getElementById('applyTextColor').addEventListener('click', function() {
+            var color = document.getElementById('textColor').value;
+            quill.format('color', color);
+        });
+        document.getElementById('applyBgColor').addEventListener('click', function() {
+            var color = document.getElementById('bgColor').value;
+            quill.format('background', color);
+        });
+
+        // 图片/视频插入
+        document.getElementById('insertImageBtn').addEventListener('click', function() {
+            var input = document.createElement('input');
+            input.type = 'file'; input.accept = 'image/*';
+            input.click();
+            input.onchange = function() {
+                if (input.files && input.files[0]) uploadAndInsert(input.files[0], 'image');
+            };
+        });
+        document.getElementById('insertVideoBtn').addEventListener('click', function() {
+            var input = document.createElement('input');
+            input.type = 'file'; input.accept = 'video/*';
+            input.click();
+            input.onchange = function() {
+                if (input.files && input.files[0]) uploadAndInsert(input.files[0], 'video');
+            };
+        });
+
+        // 监听选区变化，更新按钮高亮
+        quill.on('selection-change', function(range) {
+            if (!range) return;
+            var fmt = quill.getFormat(range);
+            document.querySelector('.fmt-btn[data-cmd="bold"]').classList.toggle('active', !!fmt.bold);
+            document.querySelector('.fmt-btn[data-cmd="italic"]').classList.toggle('active', !!fmt.italic);
+            document.querySelector('.fmt-btn[data-cmd="underline"]').classList.toggle('active', !!fmt.underline);
+            document.querySelector('.fmt-btn[data-cmd="strike"]').classList.toggle('active', !!fmt.strike);
+            document.querySelector('.fmt-btn[data-cmd="blockquote"]').classList.toggle('active', !!fmt.blockquote);
+            document.querySelector('.fmt-btn[data-cmd="code-block"]').classList.toggle('active', !!fmt['code-block']);
+        });
+    }
+
+    async function uploadAndInsert(file, type) {
+        var maxSize = type === 'video' ? 100*1024*1024 : 10*1024*1024;
+        if (file.size > maxSize) { toast('文件过大', 'error'); return; }
         var form = new FormData();
         form.append('file', file);
-        // 临时 diaryId（新建时还没有ID，用 new 标记）
-        var diaryId = currentId || 'temp';
-        form.append('diaryId', diaryId);
-
+        form.append('diaryId', currentId || 'temp');
         try {
             var resp = await window.DiaryApi.uploadMedia(form);
             if (resp.success && resp.data) {
                 var url = '/api/uploads/' + resp.data.filePath;
                 var range = quill.getSelection(true);
-                quill.insertEmbed(range.index, 'image', url);
+                quill.insertEmbed(range.index, type === 'video' ? 'video' : 'image', url);
                 quill.setSelection(range.index + 1);
+                toast('插入成功', 'success');
             } else {
                 toast(resp.message || '上传失败', 'error');
             }
-        } catch (e) {
-            toast('上传出错', 'error');
-        }
+        } catch(e) { toast('上传出错', 'error'); }
     }
 
-    // ========== 媒体上传区 ==========
-    function initUploadZone() {
-        var zone = document.getElementById('uploadZone');
-        var input = document.getElementById('fileInput');
-
-        zone.addEventListener('click', function () {
-            input.click();
+    // ========== 背景面板 ==========
+    function initBgPanel() {
+        var presets = document.querySelectorAll('.bg-preset');
+        presets.forEach(function(el) {
+            el.addEventListener('click', function() {
+                var bg = el.getAttribute('data-bg');
+                applyEditorBg(bg, '');
+                presets.forEach(function(p){ p.classList.remove('active'); });
+                el.classList.add('active');
+            });
         });
 
-        // 拖拽
-        zone.addEventListener('dragover', function (e) {
-            e.preventDefault();
-            zone.classList.add('dragover');
-        });
-        zone.addEventListener('dragleave', function () {
-            zone.classList.remove('dragover');
-        });
-        zone.addEventListener('drop', function (e) {
-            e.preventDefault();
-            zone.classList.remove('dragover');
-            if (e.dataTransfer.files.length) {
-                handleFiles(e.dataTransfer.files);
-            }
+        document.getElementById('applyBgImage').addEventListener('click', function() {
+            if (viewMode === 'scroll') { toast('滚动模式不支持自定义背景图', 'error'); return; }
+            var url = document.getElementById('bgImageUrl').value.trim();
+            if (url) applyEditorBg('', url);
         });
 
-        input.addEventListener('change', function () {
-            if (input.files.length) {
-                handleFiles(input.files);
-            }
+        document.getElementById('clearBg').addEventListener('click', function() {
+            applyEditorBg('#ffffff', '');
+            presets.forEach(function(p){ p.classList.remove('active'); });
+            document.getElementById('bgImageUrl').value = '';
         });
     }
 
-    async function handleFiles(files) {
-        for (var i = 0; i < files.length; i++) {
-            await uploadFile(files[i]);
+    function applyEditorBg(color, imageUrl) {
+        var editor = document.querySelector('.editor-area');
+        var qlEditor = document.querySelector('.editor-area .ql-editor');
+        if (color) {
+            editor.style.background = color;
+            qlEditor.style.background = color;
+            bgImage = '';
+        }
+        if (imageUrl) {
+            editor.style.background = 'url('+imageUrl+') center/cover no-repeat';
+            qlEditor.style.background = 'transparent';
+            bgImage = imageUrl;
         }
     }
 
-    async function uploadFile(file) {
-        var isImage = file.type.startsWith('image/');
-        var isVideo = file.type.startsWith('video/');
-        if (!isImage && !isVideo) {
-            toast('仅支持图片和视频', 'error');
-            return;
-        }
-        var max = isVideo ? 100 * 1024 * 1024 : 10 * 1024 * 1024;
-        if (file.size > max) {
-            toast('文件过大（图片≤10MB，视频≤100MB）', 'error');
-            return;
-        }
+    // ========== 翻页模式 ==========
+    function initPageMode() {
+        document.getElementById('modeScroll').addEventListener('click', function() { setViewMode('scroll'); });
+        document.getElementById('modePage').addEventListener('click', function() { setViewMode('page'); });
+        document.getElementById('pagePrev').addEventListener('click', function() { goToPage(currentPage - 1); });
+        document.getElementById('pageNext').addEventListener('click', function() { goToPage(currentPage + 1); });
 
-        var form = new FormData();
-        form.append('file', file);
-        form.append('diaryId', currentId || 'temp');
-
-        try {
-            var resp = await window.DiaryApi.uploadMedia(form);
-            if (resp.success && resp.data) {
-                addUploadItem(resp.data);
-                // 同时插入到编辑器
-                var url = '/api/uploads/' + resp.data.filePath;
-                if (isImage) {
-                    var range = quill.getSelection(true);
-                    quill.insertEmbed(range.index, 'image', url);
-                    quill.setSelection(range.index + 1);
-                } else {
-                    var range = quill.getSelection(true);
-                    quill.insertEmbed(range.index, 'video', url);
-                    quill.setSelection(range.index + 1);
-                }
-                toast('上传成功', 'success');
-            } else {
-                toast(resp.message || '上传失败', 'error');
-            }
-        } catch (e) {
-            toast('上传出错', 'error');
-        }
+        // 键盘翻页
+        document.addEventListener('keydown', function(e) {
+            if (viewMode !== 'page') return;
+            if (e.key === 'PageDown') { e.preventDefault(); goToPage(currentPage + 1); }
+            if (e.key === 'PageUp') { e.preventDefault(); goToPage(currentPage - 1); }
+        });
     }
 
-    function addUploadItem(media) {
-        var list = document.getElementById('uploadList');
-        var isImage = media.fileType && media.fileType.startsWith('image/');
-        var item = document.createElement('div');
-        item.className = 'upload-item';
-        if (isImage) {
-            item.innerHTML = '<img src="/api/uploads/' + media.filePath + '" alt="' + escapeHtml(media.fileName) + '">'
-                + '<span class="upload-name">' + escapeHtml(media.fileName) + '</span>';
+    function setViewMode(mode) {
+        viewMode = mode;
+        var area = document.querySelector('.editor-area');
+        var indicator = document.getElementById('pageIndicator');
+        var scrollBtn = document.getElementById('modeScroll');
+        var pageBtn = document.getElementById('modePage');
+        var bgNote = document.getElementById('bgScrollNote');
+
+        scrollBtn.classList.toggle('active', mode === 'scroll');
+        pageBtn.classList.toggle('active', mode === 'page');
+
+        if (mode === 'page') {
+            area.classList.add('page-mode');
+            indicator.style.display = 'flex';
+            if (bgImage) { applyEditorBg('', bgImage); } // 保持背景
+            recalcPages();
         } else {
-            item.innerHTML = '<span class="upload-video-icon">🎬</span>'
-                + '<span class="upload-name">' + escapeHtml(media.fileName) + '</span>';
+            area.classList.remove('page-mode');
+            indicator.style.display = 'none';
+            var qlEditor = document.querySelector('.editor-area .ql-editor');
+            qlEditor.style.transform = '';
+            // 滚动模式下如果有背景图则清除
+            if (bgImage) {
+                applyEditorBg('#ffffff', '');
+                toast('已切换到滚动模式，自定义背景已清除', 'info');
+            }
         }
-        list.appendChild(item);
+        bgNote.style.display = (mode === 'scroll') ? 'block' : 'none';
     }
 
-    // ========== 表单操作 ==========
-    function setFormValue(diary) {
-        document.getElementById('title').value = diary.title || '';
-        document.getElementById('weather').value = diary.weather || '';
-        document.getElementById('mood').value = diary.mood || '';
-        document.getElementById('tags').value = (diary.tags || []).join(', ');
-        document.getElementById('location').value = diary.location || '';
-        document.getElementById('backgroundImage').value = diary.backgroundImage || '';
-        if (diary.diaryDate || diary.createdAt) {
-            document.getElementById('diaryDate').value = timestampToDateStr(diary.diaryDate || diary.createdAt);
-        }
-        // 重要度
-        setImportance(diary.importance || 0);
-        // 富文本内容（HTML）
-        if (diary.content) {
-            quill.root.innerHTML = diary.content;
-        }
+    function recalcPages() {
+        var qlEditor = document.querySelector('.editor-area .ql-editor');
+        var area = document.querySelector('.editor-area');
+        pageHeight = area.clientHeight - 20; // 减去上下间距
+        var contentH = qlEditor.scrollHeight;
+        totalPages = Math.max(1, Math.ceil(contentH / pageHeight));
+        if (currentPage > totalPages) currentPage = totalPages;
+        updatePageDisplay();
     }
 
+    function goToPage(p) {
+        if (p < 1 || p > totalPages) return;
+        currentPage = p;
+        updatePageDisplay();
+    }
+
+    function updatePageDisplay() {
+        var qlEditor = document.querySelector('.editor-area .ql-editor');
+        qlEditor.style.transform = 'translateY(-' + ((currentPage - 1) * pageHeight) + 'px)';
+        document.getElementById('pageNum').textContent = currentPage + ' / ' + totalPages;
+    }
+
+    // ========== 侧边信息卡片 ==========
+    function initSideCard() {
+        var card = document.getElementById('sideCard');
+        var tab = document.getElementById('sideCardTab');
+        var close = document.getElementById('sideCardClose');
+
+        tab.addEventListener('click', function() { openCard(); });
+        close.addEventListener('click', function() { closeCard(); });
+
+        // 初始状态：露出角
+        card.classList.add('peek');
+    }
+
+    function openCard() {
+        var card = document.getElementById('sideCard');
+        card.classList.remove('peek');
+        card.classList.add('open');
+    }
+
+    function closeCard() {
+        var card = document.getElementById('sideCard');
+        card.classList.remove('open');
+        card.classList.add('peek');
+    }
+
+    function shakeTitle() {
+        var input = document.getElementById('title');
+        input.classList.add('error');
+        input.focus();
+        setTimeout(function(){ input.classList.remove('error'); }, 800);
+    }
+
+    // ========== 重要度 ==========
+    function setImportance(val) {
+        importanceVal = val;
+        document.querySelectorAll('#importancePicker .star').forEach(function(s) {
+            s.classList.toggle('active', +s.getAttribute('data-val') <= val);
+        });
+    }
+
+    // ========== 表单数据 ==========
     function getFormValue() {
         var dateStr = document.getElementById('diaryDate').value;
         return {
@@ -258,58 +368,67 @@
             tags:            parseTagsInput(document.getElementById('tags').value),
             importance:      importanceVal || null,
             location:        document.getElementById('location').value.trim() || null,
-            backgroundImage: document.getElementById('backgroundImage').value.trim() || null,
+            backgroundImage: bgImage || document.getElementById('bgImageUrl').value.trim() || null,
             diaryDate:       dateStrToTimestamp(dateStr)
         };
     }
 
+    function setFormValue(diary) {
+        document.getElementById('title').value = diary.title || '';
+        document.getElementById('weather').value = diary.weather || '';
+        document.getElementById('mood').value = diary.mood || '';
+        document.getElementById('tags').value = (diary.tags || []).join(', ');
+        document.getElementById('location').value = diary.location || '';
+        if (diary.diaryDate || diary.createdAt) {
+            document.getElementById('diaryDate').value = timestampToDateStr(diary.diaryDate || diary.createdAt);
+        }
+        setImportance(diary.importance || 0);
+        if (diary.content) quill.root.innerHTML = diary.content;
+        if (diary.backgroundImage) {
+            bgImage = diary.backgroundImage;
+            document.getElementById('bgImageUrl').value = bgImage;
+            applyEditorBg('', bgImage);
+        }
+    }
+
     function validate(data) {
-        if (!data.title)   return '标题不能为空';
-        // Quill 空内容是 <p><br></p>
-        var text = quill.getText().trim();
-        if (!text) return '正文不能为空';
+        if (!data.title) return '标题不能为空';
+        if (!quill.getText().trim()) return '正文不能为空';
         return null;
     }
 
-    // ========== 加载（修改模式） ==========
+    // ========== 加载日记 ==========
     async function loadDiary(id) {
-        const resp = await window.DiaryApi.getById(id);
+        var resp = await window.DiaryApi.getById(id);
         if (resp.success && resp.data) {
             currentId = id;
             setFormValue(resp.data);
             document.getElementById('pageTitle').textContent = '编辑日记';
-            document.getElementById('saveBtn').textContent = '保存修改';
-            // 加载已有的媒体文件
-            loadMediaList(id);
         } else {
-            toast(resp.message || '加载失败，日记可能已被删除', 'error');
-            isEditMode = false;
-            currentId = null;
-        }
-    }
-
-    async function loadMediaList(diaryId) {
-        try {
-            var resp = await window.DiaryApi.listMedia(diaryId);
-            if (resp.success && resp.data) {
-                resp.data.forEach(function (m) { addUploadItem(m); });
-            }
-        } catch (e) {
-            // 忽略
+            toast(resp.message || '加载失败', 'error');
+            isEditMode = false; currentId = null;
         }
     }
 
     // ========== 保存 ==========
     async function onSave() {
         var data = getFormValue();
-        var err = validate(data);
-        if (err) {
-            toast(err, 'error');
+
+        // 标题为空 → 弹出卡片 + 闪烁
+        if (!data.title) {
+            openCard();
+            shakeTitle();
+            toast('请填写日记标题', 'error');
             return;
         }
+
+        var err = validate(data);
+        if (err) { toast(err, 'error'); return; }
+
         var btn = document.getElementById('saveBtn');
-        btn.disabled = true;
-        btn.textContent = '保存中...';
+        var btnCard = document.getElementById('saveBtnCard');
+        btn.disabled = true; btn.textContent = '保存中...';
+        btnCard.disabled = true; btnCard.textContent = '保存中...';
 
         var resp;
         if (isEditMode && currentId) {
@@ -318,41 +437,40 @@
             resp = await window.DiaryApi.create(data);
         }
 
-        btn.disabled = false;
+        btn.disabled = false; btn.textContent = '保存';
+        btnCard.disabled = false; btnCard.textContent = '保存';
 
         if (resp.success) {
             toast(isEditMode ? '修改成功' : '创建成功', 'success');
-            setTimeout(function () { location.href = 'index.html'; }, 600);
+            setTimeout(function(){ location.href = 'index.html'; }, 600);
         } else {
-            btn.textContent = isEditMode ? '保存修改' : '保存';
             toast(resp.message || '保存失败', 'error');
         }
     }
 
     // ========== 启动 ==========
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function() {
         if (!window.AuthApi || !window.AuthApi.isLoggedIn()) {
-            location.href = 'login.html';
-            return;
+            location.href = 'login.html'; return;
         }
 
-        // 初始化 Quill
-        initQuill();
+        // 标记 editing 模式（用于 CSS 控制 html/body 无滚动）
+        document.documentElement.classList.add('editing');
 
-        // 初始化重要度选择器
-        document.querySelectorAll('#importancePicker .star').forEach(function (star) {
-            star.addEventListener('click', function () {
-                var val = parseInt(star.getAttribute('data-val'));
-                setImportance(val === importanceVal ? 0 : val);  // 再次点击取消
+        initQuill();
+        initBottomDock();
+        initSideCard();
+
+        // 重要度
+        document.querySelectorAll('#importancePicker .star').forEach(function(star) {
+            star.addEventListener('click', function() {
+                var v = +star.getAttribute('data-val');
+                setImportance(v === importanceVal ? 0 : v);
             });
         });
-        document.getElementById('importanceClear').addEventListener('click', function () {
-            setImportance(0);
-        });
+        document.getElementById('importanceClear').addEventListener('click', function() { setImportance(0); });
 
-        // 初始化上传区
-        initUploadZone();
-
+        // 模式检测
         var id = getQueryParam('id');
         if (id) {
             isEditMode = true;
@@ -360,18 +478,20 @@
         } else {
             isEditMode = false;
             document.getElementById('pageTitle').textContent = '写新日记';
-            document.getElementById('saveBtn').textContent = '保存';
             document.getElementById('diaryDate').value = formatDateForInput(getDefaultDiaryDate());
         }
 
-        document.getElementById('backBtn').addEventListener('click', function () {
-            location.href = 'index.html';
-        });
+        // 保存按钮（顶栏 + 卡片内）
         document.getElementById('saveBtn').addEventListener('click', onSave);
-        document.getElementById('cancelBtn').addEventListener('click', function () {
-            if (confirm('确定取消吗？未保存的内容将会丢失。')) {
-                location.href = 'index.html';
-            }
+        document.getElementById('saveBtnCard').addEventListener('click', onSave);
+        document.getElementById('backBtn').addEventListener('click', function() { location.href = 'index.html'; });
+        document.getElementById('cancelBtn').addEventListener('click', function() {
+            if (confirm('确定取消吗？未保存的内容将会丢失。')) location.href = 'index.html';
+        });
+
+        // 窗口大小变化时重算翻页
+        window.addEventListener('resize', function() {
+            if (viewMode === 'page') recalcPages();
         });
     });
 

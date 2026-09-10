@@ -46,7 +46,7 @@ curl -s http://localhost:8080/api/health
 cmd //c "e:/Project/OtoLuuDiary/frontend/start.bat"
 ```
 
-### 4. 输出结果
+### 4. 输出结果2
 
 ```
 ✅ 项目已启动！
