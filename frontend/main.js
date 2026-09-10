@@ -41,51 +41,8 @@ function createWindow() {
     // 开发阶段打开开发者工具，方便调试（上线前可注释掉）
     // win.webContents.openDevTools();
 
-    // 简化菜单栏（去掉 Electron 默认的一堆菜单）
-    const template = [
-        {
-            label: '文件',
-            submenu: [
-                {
-                    label: '刷新列表',
-                    accelerator: 'F5',
-                    click: () => win.webContents.reload()
-                },
-                { type: 'separator' },
-                { role: 'quit', label: '退出' }
-            ]
-        },
-        {
-            label: '编辑',
-            submenu: [
-                { role: 'undo', label: '撤销' },
-                { role: 'redo', label: '重做' },
-                { type: 'separator' },
-                { role: 'cut', label: '剪切' },
-                { role: 'copy', label: '复制' },
-                { role: 'paste', label: '粘贴' },
-                { role: 'selectAll', label: '全选' }
-            ]
-        },
-        {
-            label: '帮助',
-            submenu: [
-                {
-                    label: '关于 欧托留日记',
-                    click: () => {
-                        dialog.showMessageBox(win, {
-                            type: 'info',
-                            title: '关于',
-                            message: '欧托留日记 (OtoLuuDiary)',
-                            detail: '版本：0.1.0\n一款跨平台的私人日记软件。\n\n请确保先启动后端服务后再使用本软件。\n后端地址：' + API_BASE
-                        });
-                    }
-                }
-            ]
-        }
-    ];
-    const menu = Menu.buildFromTemplate(template);
-    Menu.setApplicationMenu(menu);
+    // 隐藏菜单栏
+    Menu.setApplicationMenu(null);
 }
 
 // Electron 准备完成后创建窗口
