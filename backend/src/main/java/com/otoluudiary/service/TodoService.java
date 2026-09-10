@@ -32,13 +32,18 @@ public class TodoService {
         return todoMapper.findById(id);
     }
 
-    public Todo create(String userId, String content, Integer importance, String repeatType, String dueDate) {
+    public Todo create(String userId, String title, String description, Integer importance,
+                        String repeatType, String repeatConfig, String repeatEndType, String repeatEndValue, String dueDate) {
         long now = System.currentTimeMillis();
         Todo todo = new Todo();
         todo.setUserId(userId);
-        todo.setContent(content);
+        todo.setTitle(title);
+        todo.setDescription(description);
         todo.setImportance(importance != null ? importance : 0);
         todo.setRepeatType(repeatType);
+        todo.setRepeatConfig(repeatConfig);
+        todo.setRepeatEndType(repeatEndType);
+        todo.setRepeatEndValue(repeatEndValue);
         todo.setDueDate(dueDate);
         todo.setDone(false);
         todo.setCreatedAt(now);
@@ -47,12 +52,17 @@ public class TodoService {
         return todo;
     }
 
-    public boolean update(Long id, String content, Integer importance, String repeatType, String dueDate) {
+    public boolean update(Long id, String title, String description, Integer importance,
+                           String repeatType, String repeatConfig, String repeatEndType, String repeatEndValue, String dueDate) {
         Todo existing = todoMapper.findById(id);
         if (existing == null) return false;
-        existing.setContent(content);
+        existing.setTitle(title);
+        existing.setDescription(description);
         existing.setImportance(importance != null ? importance : 0);
         existing.setRepeatType(repeatType);
+        existing.setRepeatConfig(repeatConfig);
+        existing.setRepeatEndType(repeatEndType);
+        existing.setRepeatEndValue(repeatEndValue);
         existing.setDueDate(dueDate);
         existing.setUpdatedAt(System.currentTimeMillis());
         return todoMapper.update(existing) > 0;

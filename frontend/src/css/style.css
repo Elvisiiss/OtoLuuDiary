@@ -248,6 +248,57 @@ body {
 }
 .schedule-item:hover .s-del { opacity: 1; }
 
+/* 待做清单 - 扩展样式 */
+.todo-item-title { font-weight: 600; font-size: 15px; }
+.todo-item-desc { font-size: 12px; color: var(--text-sub); margin-top: 2px; max-height: 36px; overflow: hidden; }
+
+.weekday-picker { display: flex; gap: 6px; padding: 4px 0; }
+.weekday-btn {
+    width: 32px; height: 32px; border-radius: 50%; border: 1.5px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; cursor: pointer; transition: all 0.15s; color: var(--text-sub);
+}
+.weekday-btn:hover { border-color: var(--primary); color: var(--primary); }
+.weekday-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+.form-field textarea {
+    width: 100%; padding: 8px 12px; border: 1px solid var(--border);
+    border-radius: 6px; font-size: 14px; outline: none; resize: vertical;
+    font-family: inherit; transition: border 0.2s;
+}
+.form-field textarea:focus { border-color: var(--primary); }
+
+.upload-zone {
+    border: 2px dashed var(--border); border-radius: 8px; padding: 16px;
+    text-align: center; color: var(--text-sub); cursor: pointer;
+    transition: border-color 0.15s, background 0.15s; font-size: 13px;
+}
+.upload-zone:hover { border-color: var(--primary); background: #f8faff; }
+.upload-zone.dragover { border-color: var(--primary); background: #eef2ff; }
+
+.media-preview-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.media-preview-item {
+    position: relative; width: 64px; height: 64px; border-radius: 6px;
+    overflow: hidden; border: 1px solid var(--border);
+}
+.media-preview-item img { width: 100%; height: 100%; object-fit: cover; }
+.media-preview-item video { width: 100%; height: 100%; object-fit: cover; }
+.media-preview-item .mp-remove {
+    position: absolute; top: 2px; right: 2px; width: 18px; height: 18px;
+    background: rgba(0,0,0,0.6); color: #fff; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; cursor: pointer; opacity: 0; transition: opacity 0.15s;
+}
+.media-preview-item:hover .mp-remove { opacity: 1; }
+
+/* 完成记录 */
+.completion-item {
+    background: #f9fafb; border-radius: 6px; padding: 10px 14px;
+    margin-bottom: 8px; font-size: 13px;
+}
+.completion-item .c-time { font-size: 11px; color: var(--text-sub); margin-bottom: 4px; }
+.completion-item .c-note { color: var(--text-main); }
+
 /* ============== 弹窗（Modal） ============== */
 .modal-overlay {
     position: fixed; inset: 0; background: rgba(0,0,0,0.35);

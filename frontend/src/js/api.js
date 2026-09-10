@@ -11,7 +11,8 @@ var TOKEN_KEY = 'otoluudiary_token';
 async function request(path, options) {
     options = options || {};
     var url = API_BASE + path;
-    var headers = { 'Content-Type': 'application/json' };
+    var isFormData = options.isFormData || (options.body && typeof FormData !== 'undefined' && options.body instanceof FormData);
+    var headers = {};
 
     // 自动附加 Token
     var token = localStorage.getItem(TOKEN_KEY);
@@ -19,12 +20,17 @@ async function request(path, options) {
         headers['Authorization'] = 'Bearer ' + token;
     }
 
+    // FormData 不设置 Content-Type（浏览器自动带 boundary）
+    if (!isFormData) {
+        headers['Content-Type'] = 'application/json';
+    }
+
     var fetchOpts = {
         method: options.method || 'GET',
         headers: headers
     };
     if (options.body) {
-        fetchOpts.body = typeof options.body === 'string' ? options.body : JSON.stringify(options.body);
+        fetchOpts.body = isFormData ? options.body : (typeof options.body === 'string' ? options.body : JSON.stringify(options.body));
     }
 
     try {

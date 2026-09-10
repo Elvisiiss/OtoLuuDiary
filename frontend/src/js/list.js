@@ -141,10 +141,13 @@
     }
 
     // =====================================================================
-    //  待做清单
+    //  待做清单（增强版）
     // =====================================================================
     var todoFilter = 'all';
     var editingTodoId = null;
+    var todoMediaFiles = [];    // 待上传的媒体文件
+    var completeMediaFiles = []; // 完成时的媒体文件
+    var completingTodoId = null;
 
     function initTodo() {
         // 筛选按钮
@@ -168,24 +171,137 @@
                 document.querySelectorAll('#todoImportance .star').forEach(function(x) {
                     x.classList.toggle('active', +x.getAttribute('data-val') <= v);
                 });
-                s.parentElement._val = v;
+                document.getElementById('todoImportance')._val = v;
             });
         });
+        // 循环方式切换 → 显示/隐藏自定义星期和结束条件
+        document.getElementById('todoRepeat').addEventListener('change', function() {
+            var val = this.value;
+            document.getElementById('weekdayPickerWrap').style.display = val === 'custom' ? '' : 'none';
+            document.getElementById('repeatEndWrap').style.display = val ? '' : 'none';
+        });
+        // 自定义星期按钮
+        document.querySelectorAll('#weekdayPicker .weekday-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() { btn.classList.toggle('active'); });
+        });
+        // 循环结束类型切换
+        document.getElementById('todoRepeatEndType').addEventListener('change', function() {
+            var val = this.value;
+            document.getElementById('todoRepeatEndCount').style.display = val === 'count' ? '' : 'none';
+            document.getElementById('todoRepeatEndDate').style.display = val === 'date' ? '' : 'none';
+        });
+        // 媒体上传
+        initUploadZone('todoUploadZone', 'todoFileInput', 'todoMediaPreview', todoMediaFiles);
         // 保存
         document.getElementById('todoModalSave').addEventListener('click', saveTodo);
+        // 完成弹窗
+        document.getElementById('completeModalClose').addEventListener('click', closeCompleteModal);
+        document.getElementById('completeModalCancel').addEventListener('click', closeCompleteModal);
+        document.getElementById('completeModalSave').addEventListener('click', saveCompletion);
+        initUploadZone('completeUploadZone', 'completeFileInput', 'completeMediaPreview', completeMediaFiles);
+    }
+
+    // 通用上传区域初始化
+    function initUploadZone(zoneId, inputId, previewId, fileArr) {
+        var zone = document.getElementById(zoneId);
+        var input = document.getElementById(inputId);
+        zone.addEventListener('click', function() { input.click(); });
+        input.addEventListener('change', function() {
+            if (input.files) Array.from(input.files).forEach(function(f){ fileArr.push(f); });
+            renderMediaPreview(previewId, fileArr);
+            input.value = '';
+        });
+        zone.addEventListener('dragover', function(e) { e.preventDefault(); zone.classList.add('dragover'); });
+        zone.addEventListener('dragleave', function() { zone.classList.remove('dragover'); });
+        zone.addEventListener('drop', function(e) {
+            e.preventDefault(); zone.classList.remove('dragover');
+            if (e.dataTransfer.files) Array.from(e.dataTransfer.files).forEach(function(f){ fileArr.push(f); });
+            renderMediaPreview(previewId, fileArr);
+        });
+    }
+
+    function renderMediaPreview(previewId, fileArr) {
+        var box = document.getElementById(previewId);
+        box.innerHTML = '';
+        fileArr.forEach(function(f, i) {
+            var item = document.createElement('div');
+            item.className = 'media-preview-item';
+            if (f.type && f.type.startsWith('video/')) {
+                item.innerHTML = '<video src="'+URL.createObjectURL(f)+' muted></video><span class="mp-remove" data-idx="'+i+'">✕</span>';
+            } else {
+                item.innerHTML = '<img src="'+URL.createObjectURL(f)+'"><span class="mp-remove" data-idx="'+i+'">✕</span>';
+            }
+            box.appendChild(item);
+        });
+        box.querySelectorAll('.mp-remove').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                fileArr.splice(+btn.getAttribute('data-idx'), 1);
+                renderMediaPreview(previewId, fileArr);
+            });
+        });
+    }
+
+    function getRepeatConfig() {
+        var type = document.getElementById('todoRepeat').value;
+        if (!type) return { repeatType: null, repeatConfig: null, repeatEndType: null, repeatEndValue: null };
+        var config = null;
+        if (type === 'custom') {
+            var days = [];
+            document.querySelectorAll('#weekdayPicker .weekday-btn.active').forEach(function(b) {
+                days.push(+b.getAttribute('data-day'));
+            });
+            config = JSON.stringify({ weekdays: days });
+            type = 'custom';
+        }
+        var endType = document.getElementById('todoRepeatEndType').value || 'never';
+        var endValue = null;
+        if (endType === 'count') endValue = document.getElementById('todoRepeatEndCount').value || null;
+        if (endType === 'date') endValue = document.getElementById('todoRepeatEndDate').value || null;
+        return { repeatType: type, repeatConfig: config, repeatEndType: endType, repeatEndValue: endValue };
+    }
+
+    function setRepeatConfig(todo) {
+        document.getElementById('todoRepeat').value = todo.repeatType || '';
+        document.getElementById('weekdayPickerWrap').style.display = todo.repeatType === 'custom' ? '' : 'none';
+        document.getElementById('repeatEndWrap').style.display = todo.repeatType ? '' : 'none';
+        // 恢复自定义星期
+        document.querySelectorAll('#weekdayPicker .weekday-btn').forEach(function(b){ b.classList.remove('active'); });
+        if (todo.repeatConfig) {
+            try {
+                var cfg = JSON.parse(todo.repeatConfig);
+                if (cfg.weekdays) cfg.weekdays.forEach(function(d) {
+                    var btn = document.querySelector('#weekdayPicker .weekday-btn[data-day="'+d+'"]');
+                    if (btn) btn.classList.add('active');
+                });
+            } catch(e) {}
+        }
+        // 恢复结束条件
+        document.getElementById('todoRepeatEndType').value = todo.repeatEndType || 'never';
+        document.getElementById('todoRepeatEndCount').style.display = todo.repeatEndType === 'count' ? '' : 'none';
+        document.getElementById('todoRepeatEndDate').style.display = todo.repeatEndType === 'date' ? '' : 'none';
+        document.getElementById('todoRepeatEndCount').value = todo.repeatEndValue || '';
+        document.getElementById('todoRepeatEndDate').value = todo.repeatEndValue || '';
     }
 
     function openTodoModal(todo) {
         editingTodoId = todo ? todo.id : null;
         document.getElementById('todoModalTitle').textContent = todo ? '编辑待做' : '新增待做';
-        document.getElementById('todoContent').value = todo ? todo.content : '';
-        document.getElementById('todoRepeat').value = todo ? (todo.repeatType || '') : '';
+        document.getElementById('todoTitle').value = todo ? todo.title : '';
+        document.getElementById('todoDesc').value = todo ? (todo.description || '') : '';
         document.getElementById('todoDueDate').value = todo ? (todo.dueDate || '') : '';
         var imp = todo ? (todo.importance || 0) : 0;
         document.querySelectorAll('#todoImportance .star').forEach(function(s) {
             s.classList.toggle('active', +s.getAttribute('data-val') <= imp);
         });
         document.getElementById('todoImportance')._val = imp;
+        if (todo) setRepeatConfig(todo);
+        else {
+            document.getElementById('todoRepeat').value = '';
+            document.getElementById('weekdayPickerWrap').style.display = 'none';
+            document.getElementById('repeatEndWrap').style.display = 'none';
+        }
+        todoMediaFiles = [];
+        document.getElementById('todoMediaPreview').innerHTML = '';
         document.getElementById('todoModal').style.display = 'flex';
     }
 
@@ -195,12 +311,17 @@
     }
 
     async function saveTodo() {
-        var content = document.getElementById('todoContent').value.trim();
-        if (!content) { toast('请输入内容', 'error'); return; }
+        var title = document.getElementById('todoTitle').value.trim();
+        if (!title) { toast('请输入标题', 'error'); return; }
+        var rc = getRepeatConfig();
         var data = {
-            content: content,
+            title: title,
+            description: document.getElementById('todoDesc').value.trim() || null,
             importance: document.getElementById('todoImportance')._val || 0,
-            repeatType: document.getElementById('todoRepeat').value || null,
+            repeatType: rc.repeatType,
+            repeatConfig: rc.repeatConfig,
+            repeatEndType: rc.repeatEndType,
+            repeatEndValue: rc.repeatEndValue,
             dueDate: document.getElementById('todoDueDate').value || null
         };
         var resp;
@@ -209,8 +330,34 @@
         } else {
             resp = await window.DiaryApi.request('/todos', { method: 'POST', body: data });
         }
-        if (resp.success) { toast('保存成功', 'success'); closeTodoModal(); loadTodos(); }
-        else toast(resp.message || '保存失败', 'error');
+        if (resp.success) {
+            var todoId = resp.data ? resp.data.id : editingTodoId;
+            // 上传媒体文件
+            for (var i = 0; i < todoMediaFiles.length; i++) {
+                var fd = new FormData();
+                fd.append('file', todoMediaFiles[i]);
+                await window.DiaryApi.request('/todos/' + todoId + '/media', { method: 'POST', body: fd, isFormData: true });
+            }
+            toast('保存成功', 'success'); closeTodoModal(); loadTodos();
+        } else toast(resp.message || '保存失败', 'error');
+    }
+
+    function formatRepeatText(t) {
+        if (!t.repeatType) return '';
+        var names = { daily:'每天', weekday:'工作日', weekly:'每周', monthly:'每月', custom:'自定义' };
+        var text = names[t.repeatType] || t.repeatType;
+        if (t.repeatType === 'custom' && t.repeatConfig) {
+            try {
+                var cfg = JSON.parse(t.repeatConfig);
+                if (cfg.weekdays && cfg.weekdays.length) {
+                    var dayNames = ['', '周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+                    text = cfg.weekdays.map(function(d){ return dayNames[d]; }).join('、');
+                }
+            } catch(e) {}
+        }
+        if (t.repeatEndType === 'count' && t.repeatEndValue) text += ' ×' + t.repeatEndValue;
+        if (t.repeatEndType === 'date' && t.repeatEndValue) text += ' 至' + t.repeatEndValue;
+        return text;
     }
 
     function renderTodos(list) {
@@ -222,33 +369,41 @@
         container.innerHTML = list.map(function(t) {
             var doneClass = t.done ? ' done' : '';
             var badges = '';
-            if (t.importance >= 2) badges += '<span class="todo-badge important">重要</span>';
-            if (t.repeatType) {
-                var repeatNames = { daily:'每天', weekday:'工作日', weekly:'每周', monthly:'每月' };
-                badges += '<span class="todo-badge repeat">'+(repeatNames[t.repeatType]||t.repeatType)+'</span>';
-            }
+            if (t.importance >= 3) badges += '<span class="todo-badge important">★'.repeat(t.importance)+'</span>';
+            var rptText = formatRepeatText(t);
+            if (rptText) badges += '<span class="todo-badge repeat">'+escapeHtml(rptText)+'</span>';
             var due = '';
             if (t.dueDate) {
                 var overdue = !t.done && t.dueDate < todayStr();
-                due = '<span class="todo-due'+(overdue?' overdue':'')+'">'+t.dueDate+'</span>';
+                due = '<span class="todo-due'+(overdue?' overdue':'')+'">📅 '+t.dueDate+'</span>';
             }
             return '<div class="todo-item" data-id="'+t.id+'">'
                 + '<div class="todo-check'+doneClass+'" data-id="'+t.id+'" data-done="'+(t.done?1:0)+'"></div>'
-                + '<span class="todo-text'+doneClass+'">'+escapeHtml(t.content)+'</span>'
+                + '<div style="flex:1;min-width:0;">'
+                + '<div class="todo-item-title'+doneClass+'">'+escapeHtml(t.title)+'</div>'
+                + (t.description ? '<div class="todo-item-desc">'+escapeHtml(t.description)+'</div>' : '')
+                + '</div>'
                 + badges + due
                 + '<div class="todo-actions">'
+                + '<button class="todo-complete" data-id="'+t.id+'" title="完成并记录">✅</button>'
                 + '<button class="todo-edit" data-id="'+t.id+'" title="编辑">✏️</button>'
                 + '<button class="todo-del" data-id="'+t.id+'" title="删除">🗑️</button>'
                 + '</div></div>';
         }).join('');
 
-        // 完成/取消完成
+        // 勾选完成（简单切换）
         container.querySelectorAll('.todo-check').forEach(function(ch) {
             ch.addEventListener('click', async function() {
                 var id = ch.getAttribute('data-id');
                 var done = ch.getAttribute('data-done') === '0';
                 var resp = await window.DiaryApi.request('/todos/' + id + '/done', { method: 'PUT', body: { done: done } });
                 if (resp.success) loadTodos();
+            });
+        });
+        // 完成并记录
+        container.querySelectorAll('.todo-complete').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                openCompleteModal(btn.getAttribute('data-id'));
             });
         });
         // 编辑
@@ -276,6 +431,39 @@
         var resp = await window.DiaryApi.request(url);
         if (resp.success) renderTodos(resp.data || []);
         else renderTodos([]);
+    }
+
+    // ========== 完成弹窗 ==========
+    function openCompleteModal(todoId) {
+        completingTodoId = todoId;
+        completeMediaFiles = [];
+        document.getElementById('completeNote').value = '';
+        document.getElementById('completeMediaPreview').innerHTML = '';
+        document.getElementById('completeModal').style.display = 'flex';
+    }
+    function closeCompleteModal() {
+        document.getElementById('completeModal').style.display = 'none';
+        completingTodoId = null;
+    }
+    async function saveCompletion() {
+        if (!completingTodoId) return;
+        var note = document.getElementById('completeNote').value.trim();
+        // 创建完成记录
+        var resp = await window.DiaryApi.request('/todos/' + completingTodoId + '/completions', {
+            method: 'POST', body: { note: note || null }
+        });
+        if (!resp.success) { toast('记录失败', 'error'); return; }
+        // 标记完成
+        await window.DiaryApi.request('/todos/' + completingTodoId + '/done', { method: 'PUT', body: { done: true } });
+        // 上传完成时的媒体到该 todo
+        for (var i = 0; i < completeMediaFiles.length; i++) {
+            var fd = new FormData();
+            fd.append('file', completeMediaFiles[i]);
+            await window.DiaryApi.request('/todos/' + completingTodoId + '/media', { method: 'POST', body: fd, isFormData: true });
+        }
+        toast('已完成 ✅', 'success');
+        closeCompleteModal();
+        loadTodos();
     }
 
     // =====================================================================

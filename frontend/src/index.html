@@ -102,15 +102,19 @@
 
     <!-- 待做清单弹窗 -->
     <div class="modal-overlay" id="todoModal" style="display:none;">
-        <div class="modal">
+        <div class="modal" style="width:480px;">
             <div class="modal-header">
                 <span id="todoModalTitle">新增待做</span>
                 <span class="modal-close" id="todoModalClose">✕</span>
             </div>
             <div class="modal-body">
                 <div class="form-field">
-                    <label>内容</label>
-                    <input type="text" id="todoContent" placeholder="要做什么..." maxlength="200">
+                    <label>标题 <span style="color:var(--danger)">*</span></label>
+                    <input type="text" id="todoTitle" placeholder="待做标题..." maxlength="100">
+                </div>
+                <div class="form-field">
+                    <label>描述</label>
+                    <textarea id="todoDesc" placeholder="详细描述（可选）" rows="3"></textarea>
                 </div>
                 <div class="form-row">
                     <div class="form-field">
@@ -119,27 +123,92 @@
                             <span class="star" data-val="1">★</span>
                             <span class="star" data-val="2">★</span>
                             <span class="star" data-val="3">★</span>
+                            <span class="star" data-val="4">★</span>
+                            <span class="star" data-val="5">★</span>
                         </div>
                     </div>
                     <div class="form-field">
-                        <label>循环</label>
-                        <select id="todoRepeat">
-                            <option value="">不循环</option>
-                            <option value="daily">每天</option>
-                            <option value="weekday">工作日</option>
-                            <option value="weekly">每周</option>
-                            <option value="monthly">每月</option>
-                        </select>
+                        <label>截止日期</label>
+                        <input type="date" id="todoDueDate">
                     </div>
                 </div>
+                <!-- 循环设置 -->
                 <div class="form-field">
-                    <label>截止日期（可选）</label>
-                    <input type="date" id="todoDueDate">
+                    <label>循环方式</label>
+                    <select id="todoRepeat">
+                        <option value="">不循环</option>
+                        <option value="daily">每天</option>
+                        <option value="weekday">工作日</option>
+                        <option value="weekly">每周</option>
+                        <option value="monthly">每月</option>
+                        <option value="custom">自定义（选星期）</option>
+                    </select>
+                </div>
+                <!-- 自定义星期 -->
+                <div class="form-field" id="weekdayPickerWrap" style="display:none;">
+                    <label>选择星期</label>
+                    <div class="weekday-picker" id="weekdayPicker">
+                        <span class="weekday-btn" data-day="1">一</span>
+                        <span class="weekday-btn" data-day="2">二</span>
+                        <span class="weekday-btn" data-day="3">三</span>
+                        <span class="weekday-btn" data-day="4">四</span>
+                        <span class="weekday-btn" data-day="5">五</span>
+                        <span class="weekday-btn" data-day="6">六</span>
+                        <span class="weekday-btn" data-day="7">日</span>
+                    </div>
+                </div>
+                <!-- 循环结束条件 -->
+                <div class="form-field" id="repeatEndWrap" style="display:none;">
+                    <label>循环结束</label>
+                    <div class="form-row">
+                        <select id="todoRepeatEndType">
+                            <option value="never">永不结束</option>
+                            <option value="count">循环N次后结束</option>
+                            <option value="date">到指定日期结束</option>
+                        </select>
+                        <input type="number" id="todoRepeatEndCount" placeholder="次数" min="1" style="display:none;">
+                        <input type="date" id="todoRepeatEndDate" style="display:none;">
+                    </div>
+                </div>
+                <!-- 媒体上传 -->
+                <div class="form-field">
+                    <label>附件（图片/视频）</label>
+                    <div class="todo-media-upload" id="todoMediaUpload">
+                        <input type="file" id="todoFileInput" accept="image/*,video/*" multiple style="display:none;">
+                        <div class="upload-zone" id="todoUploadZone">📷 点击或拖拽上传</div>
+                        <div class="media-preview-list" id="todoMediaPreview"></div>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-default" id="todoModalCancel">取消</button>
                 <button class="btn btn-primary" id="todoModalSave">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 完成记录弹窗 -->
+    <div class="modal-overlay" id="completeModal" style="display:none;">
+        <div class="modal" style="width:420px;">
+            <div class="modal-header">
+                <span>完成任务</span>
+                <span class="modal-close" id="completeModalClose">✕</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-field">
+                    <label>完成备注（可选）</label>
+                    <textarea id="completeNote" placeholder="记录完成时的感想或备注..." rows="3"></textarea>
+                </div>
+                <div class="form-field">
+                    <label>附件（图片/视频）</label>
+                    <input type="file" id="completeFileInput" accept="image/*,video/*" multiple style="display:none;">
+                    <div class="upload-zone" id="completeUploadZone">📷 点击上传</div>
+                    <div class="media-preview-list" id="completeMediaPreview"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" id="completeModalCancel">取消</button>
+                <button class="btn btn-primary" id="completeModalSave">确认完成</button>
             </div>
         </div>
     </div>

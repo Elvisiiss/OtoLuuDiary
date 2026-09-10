@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.otoluudiary.mapper.TodoCompletionMapper">
+
+    <resultMap id="completionMap" type="com.otoluudiary.model.TodoCompletion">
+        <id property="id" column="id"/>
+        <result property="todoId" column="todo_id"/>
+        <result property="note" column="note"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
+    <select id="findByTodoId" resultMap="completionMap">
+        SELECT * FROM todo_completion WHERE todo_id = #{todoId} ORDER BY created_at DESC
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO todo_completion (todo_id, note, created_at)
+        VALUES (#{todoId}, #{note}, #{createdAt})
+    </insert>
+
+    <delete id="deleteById">
+        DELETE FROM todo_completion WHERE id = #{id}
+    </delete>
+</mapper>
