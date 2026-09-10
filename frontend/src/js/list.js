@@ -215,9 +215,25 @@
 
     // ========== 启动 ==========
     document.addEventListener('DOMContentLoaded', function () {
+        // 检查登录状态
+        if (!window.AuthApi || !window.AuthApi.isLoggedIn()) {
+            location.href = 'login.html';
+            return;
+        }
+
         bindEvents();
         loadTags();
         loadData();
+
+        // 退出登录按钮
+        var logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', async function () {
+                if (!confirm('确定要退出登录吗？')) return;
+                await window.AuthApi.logout();
+                location.href = 'login.html';
+            });
+        }
     });
 
 })();

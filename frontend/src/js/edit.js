@@ -122,6 +122,11 @@
     // ========== 启动 ==========
 
     document.addEventListener('DOMContentLoaded', function () {
+        // 检查登录状态
+        if (!window.AuthApi || !window.AuthApi.isLoggedIn()) {
+            location.href = 'login.html';
+            return;
+        }
         const id = getQueryParam('id');
         if (id) {
             isEditMode = true;
