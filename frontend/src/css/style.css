@@ -313,45 +313,85 @@ html.editing, html.editing body {
 }
 .page-btn:hover { background: var(--bg); }
 
-/* ---------- 右侧信息卡片 ---------- */
+/* ---------- 右侧信息卡片（倾斜插入效果）---------- */
 .side-card {
     position: fixed;
-    right: -300px;
     top: 50%;
-    transform: translateY(-50%);
+    left: 50%;
     z-index: 20;
-    transition: right 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    width: 320px;
+    transform-origin: center center;
+    /* 默认：隐藏在右侧外面 */
+    transform: translate(-50%, -50%) translateX(120vw) rotate(15deg) scale(0.8);
+    opacity: 0;
+    transition:
+        transform 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 0.4s ease;
+    pointer-events: none;
 }
-.side-card.open { right: 20px; }
-.side-card.peek { right: -300px; }
+/* 露出一个角：倾斜插在右侧 */
+.side-card.peek {
+    right: auto;
+    left: auto;
+    top: 50%;
+    /* 定位到右侧边缘，只露出左上角 */
+    position: fixed;
+    top: 45%;
+    right: -60px;
+    left: auto;
+    transform: translate(0, -50%) rotate(-12deg) scale(1);
+    opacity: 1;
+    pointer-events: auto;
+    cursor: pointer;
+}
+/* 飞到正中：展开 */
+.side-card.open {
+    right: auto;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%) rotate(0deg) scale(1);
+    opacity: 1;
+    pointer-events: auto;
+}
 
+/* 露出的角上的标签 */
 .side-card-tab {
     position: absolute;
-    left: -40px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 40px;
-    height: 80px;
-    background: #fff;
-    border-radius: 8px 0 0 8px;
-    box-shadow: -2px 0 8px rgba(0,0,0,0.06);
+    top: 12px;
+    left: 12px;
+    width: 44px;
+    height: 44px;
+    background: rgba(255,255,255,0.9);
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: background 0.2s;
+    font-size: 18px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: transform 0.2s, background 0.2s;
+    z-index: 2;
 }
-.side-card-tab:hover { background: #f5f7fb; }
-.tab-icon { font-size: 20px; }
+.side-card-tab:hover { background: #fff; transform: scale(1.1); }
+.tab-icon { font-size: 20px; pointer-events: none; }
+
+/* peek 状态下 tab 隐藏（整个卡片就是可点击的角） */
+.side-card.peek .side-card-tab { display: none; }
 
 .side-card-body {
     width: 320px;
     background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 4px 24px rgba(90, 109, 180, 0.15);
-    padding: 20px;
+    border-radius: 14px;
+    box-shadow: 0 8px 40px rgba(90, 109, 180, 0.2), 0 2px 8px rgba(0,0,0,0.06);
+    padding: 24px;
     max-height: 80vh;
     overflow-y: auto;
+}
+
+/* peek 状态下卡片内容不可见 */
+.side-card.peek .side-card-body {
+    opacity: 0;
+    pointer-events: none;
 }
 
 .sc-header {

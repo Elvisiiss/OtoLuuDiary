@@ -317,28 +317,52 @@
         document.getElementById('pageNum').textContent = currentPage + ' / ' + totalPages;
     }
 
-    // ========== 侧边信息卡片 ==========
+    // ========== 侧边信息卡片（倾斜插入效果）==========
     function initSideCard() {
         var card = document.getElementById('sideCard');
         var tab = document.getElementById('sideCardTab');
         var close = document.getElementById('sideCardClose');
 
-        tab.addEventListener('click', function() { openCard(); });
-        close.addEventListener('click', function() { closeCard(); });
+        // 点击露出的角 → 飞出展开
+        card.addEventListener('click', function(e) {
+            if (card.classList.contains('peek')) {
+                e.stopPropagation();
+                openCard();
+            }
+        });
 
-        // 初始状态：露出角
+        // tab 按钮点击（open 状态下可见）
+        tab.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (card.classList.contains('open')) {
+                closeCard();
+            } else {
+                openCard();
+            }
+        });
+
+        // 关闭按钮
+        close.addEventListener('click', function(e) {
+            e.stopPropagation();
+            closeCard();
+        });
+
+        // 初始状态：露出角（倾斜插在右侧）
         card.classList.add('peek');
     }
 
     function openCard() {
         var card = document.getElementById('sideCard');
         card.classList.remove('peek');
+        // 强制重排以触发过渡动画
+        void card.offsetWidth;
         card.classList.add('open');
     }
 
     function closeCard() {
         var card = document.getElementById('sideCard');
         card.classList.remove('open');
+        void card.offsetWidth;
         card.classList.add('peek');
     }
 
