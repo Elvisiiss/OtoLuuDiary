@@ -199,6 +199,24 @@ body {
 }
 .importance-clear:hover { opacity: 1; color: var(--danger); }
 
+/* 天气图标选择器 */
+.weather-picker {
+    display: flex; flex-wrap: wrap; gap: 6px; padding: 6px 0;
+}
+.weather-picker img {
+    width: 32px; height: 32px; cursor: pointer;
+    border-radius: 8px; padding: 3px;
+    border: 2px solid transparent;
+    transition: border-color 0.15s, transform 0.15s, background 0.15s;
+}
+.weather-picker img:hover {
+    background: #f0f4ff; transform: scale(1.1);
+}
+.weather-picker img.active {
+    border-color: var(--primary); background: #eef2ff;
+    transform: scale(1.1);
+}
+
 /* ============== 带背景图的卡片（列表页） ============== */
 .diary-card.has-bg { color: #fff; position: relative; }
 .diary-card.has-bg::before {

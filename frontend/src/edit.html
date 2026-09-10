@@ -56,42 +56,60 @@
                     <span class="sc-title">日记信息</span>
                 </div>
                 <div class="sc-fields">
-                    <div class="sc-field">
-                        <label>标题 <span class="required">*</span></label>
-                        <input type="text" id="title" maxlength="100" placeholder="给日记起个标题...">
+                    <!-- 第一行：标题 | 日期 -->
+                    <div class="sc-row">
+                        <div class="sc-field">
+                            <label>标题 <span class="required">*</span></label>
+                            <input type="text" id="title" maxlength="100" placeholder="给日记起个标题...">
+                        </div>
+                        <div class="sc-field">
+                            <label>日期</label>
+                            <input type="date" id="diaryDate">
+                        </div>
                     </div>
-                    <div class="sc-field">
-                        <label>日期</label>
-                        <input type="date" id="diaryDate">
-                    </div>
+                    <!-- 第二行：天气 | 心情 -->
                     <div class="sc-row">
                         <div class="sc-field">
                             <label>天气</label>
-                            <input type="text" id="weather" maxlength="20" placeholder="晴">
+                            <div class="weather-picker" id="weatherPicker">
+                                <img src="icons/weather-sunny.svg" data-val="晴" title="晴" alt="晴">
+                                <img src="icons/weather-cloudy.svg" data-val="多云" title="多云" alt="多云">
+                                <img src="icons/weather-overcast.svg" data-val="阴" title="阴" alt="阴">
+                                <img src="icons/weather-light-rain.svg" data-val="小雨" title="小雨" alt="小雨">
+                                <img src="icons/weather-heavy-rain.svg" data-val="大雨" title="大雨" alt="大雨">
+                                <img src="icons/weather-thunderstorm.svg" data-val="雷雨" title="雷雨" alt="雷雨">
+                                <img src="icons/weather-snow.svg" data-val="雪" title="雪" alt="雪">
+                                <img src="icons/weather-fog.svg" data-val="雾" title="雾" alt="雾">
+                                <img src="icons/weather-windy.svg" data-val="大风" title="大风" alt="大风">
+                            </div>
                         </div>
                         <div class="sc-field">
                             <label>心情</label>
                             <input type="text" id="mood" maxlength="20" placeholder="开心">
                         </div>
                     </div>
+                    <!-- 第三行：标签（独占一行） -->
                     <div class="sc-field">
                         <label>标签</label>
                         <input type="text" id="tags" maxlength="200" placeholder="逗号分隔">
                     </div>
-                    <div class="sc-field">
-                        <label>重要度</label>
-                        <div class="importance-picker" id="importancePicker">
-                            <span class="star" data-val="1">★</span>
-                            <span class="star" data-val="2">★</span>
-                            <span class="star" data-val="3">★</span>
-                            <span class="star" data-val="4">★</span>
-                            <span class="star" data-val="5">★</span>
-                            <span class="importance-clear" id="importanceClear" title="清除">✕</span>
+                    <!-- 第四行：重要度 | 位置 -->
+                    <div class="sc-row">
+                        <div class="sc-field">
+                            <label>重要度</label>
+                            <div class="importance-picker" id="importancePicker">
+                                <span class="star" data-val="1">★</span>
+                                <span class="star" data-val="2">★</span>
+                                <span class="star" data-val="3">★</span>
+                                <span class="star" data-val="4">★</span>
+                                <span class="star" data-val="5">★</span>
+                                <span class="importance-clear" id="importanceClear" title="清除">✕</span>
+                            </div>
                         </div>
-                    </div>
-                    <div class="sc-field">
-                        <label>位置</label>
-                        <input type="text" id="location" maxlength="200" placeholder="如：北京市朝阳区">
+                        <div class="sc-field">
+                            <label>位置</label>
+                            <input type="text" id="location" maxlength="200" placeholder="如：北京市朝阳区">
+                        </div>
                     </div>
                 </div>
                 <div class="sc-actions">

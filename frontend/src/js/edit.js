@@ -11,6 +11,7 @@
     var isEditMode = false;
     var quill = null;
     var importanceVal = 0;
+    var weatherVal = '';   // 当前选中天气
     var viewMode = 'scroll';  // 'scroll' | 'page'
     var currentPage = 1;
     var totalPages = 1;
@@ -370,13 +371,21 @@
         });
     }
 
+    // ========== 天气选择 ==========
+    function setWeather(val) {
+        weatherVal = val || '';
+        document.querySelectorAll('#weatherPicker img').forEach(function(img) {
+            img.classList.toggle('active', img.getAttribute('data-val') === weatherVal);
+        });
+    }
+
     // ========== 表单数据 ==========
     function getFormValue() {
         var dateStr = document.getElementById('diaryDate').value;
         return {
             title:           document.getElementById('title').value.trim(),
             content:         quill.root.innerHTML,
-            weather:         document.getElementById('weather').value.trim() || null,
+            weather:         weatherVal || null,
             mood:            document.getElementById('mood').value.trim() || null,
             tags:            parseTagsInput(document.getElementById('tags').value),
             importance:      importanceVal || null,
@@ -388,7 +397,7 @@
 
     function setFormValue(diary) {
         document.getElementById('title').value = diary.title || '';
-        document.getElementById('weather').value = diary.weather || '';
+        setWeather(diary.weather || '');
         document.getElementById('mood').value = diary.mood || '';
         document.getElementById('tags').value = (diary.tags || []).join(', ');
         document.getElementById('location').value = diary.location || '';
@@ -482,6 +491,14 @@
             });
         });
         document.getElementById('importanceClear').addEventListener('click', function() { setImportance(0); });
+
+        // 天气图标选择
+        document.querySelectorAll('#weatherPicker img').forEach(function(img) {
+            img.addEventListener('click', function() {
+                var v = img.getAttribute('data-val');
+                setWeather(v === weatherVal ? '' : v);
+            });
+        });
 
         // 模式检测
         var id = getQueryParam('id');
