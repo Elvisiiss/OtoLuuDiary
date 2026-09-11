@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS `todo` (
     `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键',
     `user_id` VARCHAR(64) NOT NULL COMMENT '所属用户',
     `title` VARCHAR(100) NOT NULL COMMENT '标题',
-    `content` TEXT NOT NULL COMMENT '内容（兼容旧表，与title保持一致）',
+    `content` VARCHAR(200) NOT NULL COMMENT '内容（兼容旧表，与title保持一致）',
     `description` TEXT DEFAULT NULL COMMENT '描述',
     `importance` TINYINT DEFAULT 0 COMMENT '重要度 0-5',
     `repeat_type` VARCHAR(20) DEFAULT NULL COMMENT '循环类型：daily/weekday/weekly/monthly/custom',
