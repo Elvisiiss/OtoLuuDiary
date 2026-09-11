@@ -11,6 +11,7 @@ public class Todo {
     private String repeatConfig;
     private String repeatEndType;
     private String repeatEndValue;
+    private Integer repeatCount;
     private String dueDate;
     private Boolean done;
     private Long createdAt;
@@ -36,6 +37,8 @@ public class Todo {
     public void setRepeatEndType(String repeatEndType) { this.repeatEndType = repeatEndType; }
     public String getRepeatEndValue() { return repeatEndValue; }
     public void setRepeatEndValue(String repeatEndValue) { this.repeatEndValue = repeatEndValue; }
+    public Integer getRepeatCount() { return repeatCount; }
+    public void setRepeatCount(Integer repeatCount) { this.repeatCount = repeatCount; }
     public String getDueDate() { return dueDate; }
     public void setDueDate(String dueDate) { this.dueDate = dueDate; }
     public Boolean getDone() { return done; }

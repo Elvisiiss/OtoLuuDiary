@@ -47,6 +47,7 @@ public class TodoService {
         todo.setRepeatConfig(repeatConfig);
         todo.setRepeatEndType(repeatEndType);
         todo.setRepeatEndValue(repeatEndValue);
+        todo.setRepeatCount(1);
         todo.setDueDate(dueDate);
         todo.setDone(false);
         todo.setCreatedAt(now);
@@ -136,6 +137,7 @@ public class TodoService {
         next.setRepeatConfig(todo.getRepeatConfig());
         next.setRepeatEndType(todo.getRepeatEndType());
         next.setRepeatEndValue(todo.getRepeatEndValue());
+        next.setRepeatCount(todo.getRepeatCount() != null ? todo.getRepeatCount() + 1 : 2);
         next.setDueDate(nextDate.format(DateTimeFormatter.ISO_LOCAL_DATE));
         next.setDone(false);
         next.setCreatedAt(nextDate.atStartOfDay(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli());
@@ -204,8 +206,13 @@ public class TodoService {
             return false;
         }
         if ("count".equals(todo.getRepeatEndType()) && todo.getRepeatEndValue() != null) {
-            // 剩余次数用完则结束（这里简化处理：用 created_at 推算）
-            return false; // 由前端控制，暂不处理
+            try {
+                int maxCount = Integer.parseInt(todo.getRepeatEndValue());
+                int currentCount = todo.getRepeatCount() != null ? todo.getRepeatCount() : 1;
+                return currentCount >= maxCount;
+            } catch (NumberFormatException e) {
+                return false;
+            }
         }
         if ("date".equals(todo.getRepeatEndType()) && todo.getRepeatEndValue() != null) {
             try {

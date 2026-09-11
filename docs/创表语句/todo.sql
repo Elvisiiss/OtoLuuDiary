@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS `todo` (
     `repeat_config` VARCHAR(500) DEFAULT NULL COMMENT 'JSON循环配置，如{"weekdays":[3,4]}',
     `repeat_end_type` VARCHAR(20) DEFAULT NULL COMMENT '循环结束方式：never/count/date',
     `repeat_end_value` VARCHAR(20) DEFAULT NULL COMMENT '循环结束值：次数或日期yyyy-MM-dd',
+    `repeat_count` INT DEFAULT 1 COMMENT '当前循环次数（每次完成+1）',
     `due_date` VARCHAR(10) DEFAULT NULL COMMENT '截止日期 yyyy-MM-dd',
     `done` TINYINT(1) DEFAULT 0 COMMENT '是否完成 0否1是',
     `created_at` BIGINT NOT NULL COMMENT '创建时间戳(ms)',
