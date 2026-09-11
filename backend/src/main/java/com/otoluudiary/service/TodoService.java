@@ -26,6 +26,12 @@ public class TodoService {
             return todoMapper.findByUserIdWeek(userId, today.format(DateTimeFormatter.ISO_LOCAL_DATE), weekEnd.format(DateTimeFormatter.ISO_LOCAL_DATE));
         } else if ("important".equals(filter)) {
             return todoMapper.findByUserIdImportant(userId);
+        } else if ("upcoming".equals(filter)) {
+            LocalDate today = LocalDate.now();
+            LocalDate weekEnd = today.plusDays(7);
+            return todoMapper.findByUserIdUpcoming(userId, today.format(DateTimeFormatter.ISO_LOCAL_DATE), weekEnd.format(DateTimeFormatter.ISO_LOCAL_DATE));
+        } else if ("overdue".equals(filter)) {
+            return todoMapper.findByUserIdOverdue(userId, LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE));
         }
         return todoMapper.findByUserId(userId);
     }

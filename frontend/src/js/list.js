@@ -288,6 +288,7 @@
         document.getElementById('todoModalTitle').textContent = todo ? '编辑待做' : '新增待做';
         document.getElementById('todoTitle').value = todo ? todo.title : '';
         document.getElementById('todoDesc').value = todo ? (todo.description || '') : '';
+        document.getElementById('todoDueDate').value = todo ? (todo.dueDate || '') : '';
         var imp = todo ? (todo.importance || 0) : 0;
         document.querySelectorAll('#todoImportance .star').forEach(function(s) {
             s.classList.toggle('active', +s.getAttribute('data-val') <= imp);
@@ -320,7 +321,8 @@
             repeatType: rc.repeatType,
             repeatConfig: rc.repeatConfig,
             repeatEndType: rc.repeatEndType,
-            repeatEndValue: rc.repeatEndValue
+            repeatEndValue: rc.repeatEndValue,
+            dueDate: document.getElementById('todoDueDate').value || null
         };
         var resp;
         if (editingTodoId) {
@@ -370,13 +372,24 @@
             if (t.importance >= 3) badges += '<span class="todo-badge important">★'.repeat(t.importance)+'</span>';
             var rptText = formatRepeatText(t);
             if (rptText) badges += '<span class="todo-badge repeat">'+escapeHtml(rptText)+'</span>';
+            var due = '';
+            if (t.dueDate && !t.done) {
+                var today = new Date(); today.setHours(0,0,0,0);
+                var dueD = new Date(t.dueDate + 'T00:00:00');
+                var diff = Math.ceil((dueD - today) / 86400000);
+                if (diff < 0) due = '<span class="todo-countdown overdue">❌ 已逾期'+Math.abs(diff)+'天</span>';
+                else if (diff === 0) due = '<span class="todo-countdown today">🔴 今天到期</span>';
+                else if (diff <= 2) due = '<span class="todo-countdown urgent">⚠️ 还剩'+diff+'天</span>';
+                else if (diff <= 7) due = '<span class="todo-countdown soon">📅 还剩'+diff+'天</span>';
+                else due = '<span class="todo-countdown">📅 还剩'+diff+'天</span>';
+            }
             return '<div class="todo-item" data-id="'+t.id+'">'
                 + '<div class="todo-check'+doneClass+'" data-id="'+t.id+'" data-done="'+(t.done?1:0)+'"></div>'
                 + '<div style="flex:1;min-width:0;">'
                 + '<div class="todo-item-title'+doneClass+'">'+escapeHtml(t.title)+'</div>'
                 + (t.description ? '<div class="todo-item-desc">'+escapeHtml(t.description)+'</div>' : '')
                 + '</div>'
-                + badges
+                + badges + due
                 + '<div class="todo-actions">'
                 + '<button class="todo-complete" data-id="'+t.id+'" title="完成并记录">✅</button>'
                 + '<button class="todo-edit" data-id="'+t.id+'" title="编辑">✏️</button>'
@@ -421,6 +434,8 @@
         if (todoFilter === 'today') url = '/todos?filter=today';
         else if (todoFilter === 'week') url = '/todos?filter=week';
         else if (todoFilter === 'important') url = '/todos?filter=important';
+        else if (todoFilter === 'upcoming') url = '/todos?filter=upcoming';
+        else if (todoFilter === 'overdue') url = '/todos?filter=overdue';
         var resp = await window.DiaryApi.request(url);
         if (resp.success) renderTodos(resp.data || []);
         else renderTodos([]);

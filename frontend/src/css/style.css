@@ -176,6 +176,14 @@ body {
 .todo-badge.important { background: #fef2f2; color: var(--danger); }
 .todo-due { font-size: 12px; color: var(--text-sub); }
 .todo-due.overdue { color: var(--danger); }
+.todo-countdown {
+    font-size: 11px; padding: 2px 8px; border-radius: 10px;
+    background: #f0f4ff; color: #666; white-space: nowrap;
+}
+.todo-countdown.soon { background: #fff7ed; color: #c27a30; }
+.todo-countdown.urgent { background: #fef2f2; color: #e74c3c; }
+.todo-countdown.today { background: #fef2f2; color: #e74c3c; font-weight: 600; }
+.todo-countdown.overdue { background: #fef2f2; color: var(--danger); font-weight: 600; }
 .todo-actions { display: flex; gap: 4px; }
 .todo-actions button {
     background: none; border: none; cursor: pointer; font-size: 16px;

@@ -52,6 +52,8 @@
                     <span class="todo-filter" data-filter="today">今天</span>
                     <span class="todo-filter" data-filter="week">本周</span>
                     <span class="todo-filter" data-filter="important">重要</span>
+                    <span class="todo-filter" data-filter="upcoming">⏰ 即将到期</span>
+                    <span class="todo-filter" data-filter="overdue">❌ 已逾期</span>
                 </div>
                 <div class="todo-list" id="todoList"></div>
             </div>
@@ -125,6 +127,10 @@
                         <span class="star" data-val="4">★</span>
                         <span class="star" data-val="5">★</span>
                     </div>
+                </div>
+                <div class="form-field">
+                    <label>截止日期</label>
+                    <input type="date" id="todoDueDate">
                 </div>
                 <!-- 循环设置 -->
                 <div class="form-field">

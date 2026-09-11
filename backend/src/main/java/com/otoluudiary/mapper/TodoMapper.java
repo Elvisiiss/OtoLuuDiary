@@ -11,6 +11,8 @@ public interface TodoMapper {
     List<Todo> findByUserIdToday(@Param("userId") String userId, @Param("today") String today);
     List<Todo> findByUserIdWeek(@Param("userId") String userId, @Param("today") String today, @Param("weekEnd") String weekEnd);
     List<Todo> findByUserIdImportant(@Param("userId") String userId);
+    List<Todo> findByUserIdUpcoming(@Param("userId") String userId, @Param("today") String today, @Param("weekEnd") String weekEnd);
+    List<Todo> findByUserIdOverdue(@Param("userId") String userId, @Param("today") String today);
     Todo findById(@Param("id") Long id);
     int insert(Todo todo);
     int update(Todo todo);

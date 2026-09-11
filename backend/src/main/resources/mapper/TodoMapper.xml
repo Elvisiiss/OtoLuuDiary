@@ -41,6 +41,18 @@
         ORDER BY done ASC, importance DESC, created_at DESC
     </select>
 
+    <select id="findByUserIdUpcoming" resultMap="todoMap">
+        SELECT * FROM todo WHERE user_id = #{userId}
+        AND due_date BETWEEN #{today} AND #{weekEnd} AND done = 0
+        ORDER BY due_date ASC, importance DESC
+    </select>
+
+    <select id="findByUserIdOverdue" resultMap="todoMap">
+        SELECT * FROM todo WHERE user_id = #{userId}
+        AND due_date IS NOT NULL AND due_date &lt; #{today} AND done = 0
+        ORDER BY due_date ASC, importance DESC
+    </select>
+
     <select id="findById" resultMap="todoMap">
         SELECT * FROM todo WHERE id = #{id}
     </select>
