@@ -20,6 +20,17 @@ spring:
     hikari:
       maximum-pool-size: 10
       minimum-idle: 5
+      # 连接最大存活时间，需小于 MySQL wait_timeout（默认28800s）
+      # 远程连接建议设短一些，避免被中间网络层断开
+      max-lifetime: 1800000
+      # 空闲连接回收时间
+      idle-timeout: 600000
+      # 获取连接超时
+      connection-timeout: 10000
+      # 连接验证 SQL（MySQL 推荐用 SELECT 1）
+      connection-test-query: SELECT 1
+      # 从连接池获取连接前先验证
+      validation-timeout: 5000
   data:
     redis:
       host: 110.42.193.119

@@ -38,6 +38,7 @@ public class TodoService {
         Todo todo = new Todo();
         todo.setUserId(userId);
         todo.setTitle(title);
+        todo.setContent(title != null ? title : "");
         todo.setDescription(description);
         todo.setImportance(importance != null ? importance : 0);
         todo.setRepeatType(repeatType);
@@ -57,6 +58,7 @@ public class TodoService {
         Todo existing = todoMapper.findById(id);
         if (existing == null) return false;
         existing.setTitle(title);
+        existing.setContent(title != null ? title : "");
         existing.setDescription(description);
         existing.setImportance(importance != null ? importance : 0);
         existing.setRepeatType(repeatType);

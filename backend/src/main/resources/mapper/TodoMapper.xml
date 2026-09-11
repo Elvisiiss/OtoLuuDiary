@@ -6,6 +6,7 @@
         <id property="id" column="id"/>
         <result property="userId" column="user_id"/>
         <result property="title" column="title"/>
+        <result property="content" column="content"/>
         <result property="description" column="description"/>
         <result property="importance" column="importance"/>
         <result property="repeatType" column="repeat_type"/>
@@ -44,14 +45,14 @@
     </select>
 
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO todo (user_id, title, description, importance, repeat_type, repeat_config,
+        INSERT INTO todo (user_id, title, content, description, importance, repeat_type, repeat_config,
                           repeat_end_type, repeat_end_value, due_date, done, created_at, updated_at)
-        VALUES (#{userId}, #{title}, #{description}, #{importance}, #{repeatType}, #{repeatConfig},
+        VALUES (#{userId}, #{title}, #{content}, #{description}, #{importance}, #{repeatType}, #{repeatConfig},
                 #{repeatEndType}, #{repeatEndValue}, #{dueDate}, #{done}, #{createdAt}, #{updatedAt})
     </insert>
 
     <update id="update">
-        UPDATE todo SET title = #{title}, description = #{description}, importance = #{importance},
+        UPDATE todo SET title = #{title}, content = #{content}, description = #{description}, importance = #{importance},
         repeat_type = #{repeatType}, repeat_config = #{repeatConfig},
         repeat_end_type = #{repeatEndType}, repeat_end_value = #{repeatEndValue},
         due_date = #{dueDate}, updated_at = #{updatedAt}
