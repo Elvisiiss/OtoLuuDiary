@@ -30,6 +30,6 @@ public class CalendarPlanService {
     }
 
     public boolean delete(Long id) {
-        return planMapper.deleteById(id) > 0;
+        return planMapper.deleteById(id, System.currentTimeMillis()) > 0;
     }
 }

@@ -17,9 +17,12 @@ CREATE TABLE IF NOT EXISTS diary (
     diary_date      BIGINT                COMMENT '日记日期（当天0点毫秒时间戳，由用户选择或按4:00规则默认）',
     created_at      BIGINT                COMMENT '创建时间（毫秒时间戳）',
     updated_at      BIGINT                COMMENT '最后修改时间（毫秒时间戳）',
+    is_deleted      TINYINT(1)   NOT NULL DEFAULT 0 COMMENT '是否已删除 0=否 1=是',
+    deleted_at      BIGINT       DEFAULT NULL COMMENT '删除时间（毫秒时间戳）',
     PRIMARY KEY (id),
     INDEX idx_user_id (user_id),
-    INDEX idx_importance (importance)
+    INDEX idx_importance (importance),
+    INDEX idx_is_deleted (is_deleted)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COMMENT = '日记表';
@@ -29,3 +32,8 @@ ALTER TABLE diary ADD COLUMN importance TINYINT DEFAULT 0 COMMENT '重要度 0-5
 ALTER TABLE diary ADD COLUMN location VARCHAR(200) COMMENT '位置信息' AFTER importance;
 ALTER TABLE diary ADD COLUMN background_image VARCHAR(500) COMMENT '卡片背景图片URL' AFTER location;
 ALTER TABLE diary ADD COLUMN diary_date BIGINT COMMENT '日记日期（当天0点毫秒时间戳）' AFTER background_image;
+
+-- 兼容已有库：添加假删除字段
+ALTER TABLE diary ADD COLUMN is_deleted TINYINT(1) NOT NULL DEFAULT 0 COMMENT '是否已删除 0=否 1=是';
+ALTER TABLE diary ADD COLUMN deleted_at BIGINT DEFAULT NULL COMMENT '删除时间（毫秒时间戳）';
+ALTER TABLE diary ADD INDEX idx_is_deleted (is_deleted);

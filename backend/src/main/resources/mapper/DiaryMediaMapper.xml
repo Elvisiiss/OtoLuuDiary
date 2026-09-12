@@ -12,6 +12,8 @@
         <result property="fileType"  column="file_type"/>
         <result property="fileSize"  column="file_size"/>
         <result property="createdAt" column="created_at"/>
+        <result property="isDeleted" column="is_deleted"/>
+        <result property="deletedAt" column="deleted_at"/>
     </resultMap>
 
     <insert id="insert">
@@ -20,24 +22,28 @@
     </insert>
 
     <select id="findByDiaryId" resultMap="mediaResultMap">
-        SELECT id, diary_id, file_name, file_path, file_type, file_size, created_at
+        SELECT id, diary_id, file_name, file_path, file_type, file_size, created_at, is_deleted, deleted_at
         FROM diary_media
-        WHERE diary_id = #{diaryId}
+        WHERE diary_id = #{diaryId} AND is_deleted = 0
         ORDER BY created_at ASC
     </select>
 
     <select id="findById" resultMap="mediaResultMap">
-        SELECT id, diary_id, file_name, file_path, file_type, file_size, created_at
+        SELECT id, diary_id, file_name, file_path, file_type, file_size, created_at, is_deleted, deleted_at
         FROM diary_media
-        WHERE id = #{id}
+        WHERE id = #{id} AND is_deleted = 0
     </select>
 
-    <delete id="deleteById">
-        DELETE FROM diary_media WHERE id = #{id}
-    </delete>
+    <!-- 假删除：标记 is_deleted=1 -->
+    <update id="deleteById">
+        UPDATE diary_media SET is_deleted = 1, deleted_at = #{deletedAt}
+        WHERE id = #{id} AND is_deleted = 0
+    </update>
 
-    <delete id="deleteByDiaryId">
-        DELETE FROM diary_media WHERE diary_id = #{diaryId}
-    </delete>
+    <!-- 假删除：按日记ID批量标记 -->
+    <update id="deleteByDiaryId">
+        UPDATE diary_media SET is_deleted = 1, deleted_at = #{deletedAt}
+        WHERE diary_id = #{diaryId} AND is_deleted = 0
+    </update>
 
 </mapper>

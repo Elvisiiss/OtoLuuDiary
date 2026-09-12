@@ -48,6 +48,12 @@ public class Diary {
     /** 最后修改时间（毫秒时间戳，系统自动更新） */
     private Long updatedAt;
 
+    /** 是否已删除 0=否 1=是 */
+    private Boolean isDeleted;
+
+    /** 删除时间（毫秒时间戳） */
+    private Long deletedAt;
+
     // ========== 构造方法 ==========
 
     public Diary() {
@@ -183,6 +189,22 @@ public class Diary {
 
     public void setUpdatedAt(Long updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public Boolean getIsDeleted() {
+        return isDeleted;
+    }
+
+    public void setIsDeleted(Boolean isDeleted) {
+        this.isDeleted = isDeleted;
+    }
+
+    public Long getDeletedAt() {
+        return deletedAt;
+    }
+
+    public void setDeletedAt(Long deletedAt) {
+        this.deletedAt = deletedAt;
     }
 
     @Override

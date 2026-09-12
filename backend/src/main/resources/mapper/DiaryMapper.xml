@@ -19,26 +19,28 @@
         <result property="diaryDate"       column="diary_date"/>
         <result property="createdAt"       column="created_at"/>
         <result property="updatedAt"       column="updated_at"/>
+        <result property="isDeleted"       column="is_deleted"/>
+        <result property="deletedAt"       column="deleted_at"/>
     </resultMap>
 
     <sql id="diaryColumns">
         id, user_id, title, content, tags, weather, mood,
         importance, location, background_image,
-        diary_date, created_at, updated_at
+        diary_date, created_at, updated_at, is_deleted, deleted_at
     </sql>
 
     <!-- 查询指定用户的全部日记 -->
     <select id="findAll" resultMap="diaryResultMap">
         SELECT <include refid="diaryColumns"/>
         FROM diary
-        WHERE user_id = #{userId}
+        WHERE user_id = #{userId} AND is_deleted = 0
         ORDER BY COALESCE(diary_date, created_at) DESC
     </select>
 
     <select id="findById" resultMap="diaryResultMap">
         SELECT <include refid="diaryColumns"/>
         FROM diary
-        WHERE id = #{id}
+        WHERE id = #{id} AND is_deleted = 0
     </select>
 
     <insert id="insert">
@@ -77,16 +79,18 @@
         WHERE id = #{id}
     </update>
 
-    <delete id="deleteById">
-        DELETE FROM diary
-        WHERE id = #{id}
-    </delete>
+    <!-- 假删除：标记 is_deleted=1 -->
+    <update id="deleteById">
+        UPDATE diary
+        SET is_deleted = 1, deleted_at = #{deletedAt}
+        WHERE id = #{id} AND is_deleted = 0
+    </update>
 
     <!-- 关键词搜索：限定用户 -->
     <select id="searchByKeyword" resultMap="diaryResultMap">
         SELECT <include refid="diaryColumns"/>
         FROM diary
-        WHERE user_id = #{userId}
+        WHERE user_id = #{userId} AND is_deleted = 0
         <if test="keyword != null and keyword != ''">
             AND (title LIKE CONCAT('%', #{keyword}, '%')
                  OR content LIKE CONCAT('%', #{keyword}, '%'))
@@ -98,7 +102,7 @@
     <select id="filterByTag" resultMap="diaryResultMap">
         SELECT <include refid="diaryColumns"/>
         FROM diary
-        WHERE user_id = #{userId}
+        WHERE user_id = #{userId} AND is_deleted = 0
         <if test="tag != null and tag != ''">
             AND LOWER(CAST(tags AS CHAR)) LIKE CONCAT('%"', LOWER(#{tag}), '"%')
         </if>
@@ -110,14 +114,14 @@
         SELECT DISTINCT t.tag
         FROM diary d,
              JSON_TABLE(d.tags, '$[*]' COLUMNS (tag VARCHAR(100) PATH '$')) t
-        WHERE d.user_id = #{userId}
+        WHERE d.user_id = #{userId} AND d.is_deleted = 0
           AND t.tag IS NOT NULL
           AND TRIM(t.tag) != ''
         ORDER BY t.tag
     </select>
 
     <select id="count" resultType="long">
-        SELECT COUNT(*) FROM diary
+        SELECT COUNT(*) FROM diary WHERE is_deleted = 0
     </select>
 
 </mapper>

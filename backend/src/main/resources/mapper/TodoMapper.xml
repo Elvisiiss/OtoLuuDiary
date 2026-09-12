@@ -18,43 +18,45 @@
         <result property="done" column="done"/>
         <result property="createdAt" column="created_at"/>
         <result property="updatedAt" column="updated_at"/>
+        <result property="isDeleted" column="is_deleted"/>
+        <result property="deletedAt" column="deleted_at"/>
     </resultMap>
 
     <select id="findByUserId" resultMap="todoMap">
-        SELECT * FROM todo WHERE user_id = #{userId} ORDER BY done ASC, importance DESC, created_at DESC
+        SELECT * FROM todo WHERE user_id = #{userId} AND is_deleted = 0 ORDER BY done ASC, importance DESC, created_at DESC
     </select>
 
     <select id="findByUserIdToday" resultMap="todoMap">
-        SELECT * FROM todo WHERE user_id = #{userId}
+        SELECT * FROM todo WHERE user_id = #{userId} AND is_deleted = 0
         AND (due_date = #{today} OR repeat_type IS NOT NULL)
         ORDER BY done ASC, importance DESC, created_at DESC
     </select>
 
     <select id="findByUserIdWeek" resultMap="todoMap">
-        SELECT * FROM todo WHERE user_id = #{userId}
+        SELECT * FROM todo WHERE user_id = #{userId} AND is_deleted = 0
         AND (due_date BETWEEN #{today} AND #{weekEnd} OR repeat_type IS NOT NULL)
         ORDER BY done ASC, importance DESC, created_at DESC
     </select>
 
     <select id="findByUserIdImportant" resultMap="todoMap">
-        SELECT * FROM todo WHERE user_id = #{userId} AND importance >= 3
+        SELECT * FROM todo WHERE user_id = #{userId} AND is_deleted = 0 AND importance >= 3
         ORDER BY done ASC, importance DESC, created_at DESC
     </select>
 
     <select id="findByUserIdUpcoming" resultMap="todoMap">
-        SELECT * FROM todo WHERE user_id = #{userId}
+        SELECT * FROM todo WHERE user_id = #{userId} AND is_deleted = 0
         AND due_date BETWEEN #{today} AND #{weekEnd} AND done = 0
         ORDER BY due_date ASC, importance DESC
     </select>
 
     <select id="findByUserIdOverdue" resultMap="todoMap">
-        SELECT * FROM todo WHERE user_id = #{userId}
+        SELECT * FROM todo WHERE user_id = #{userId} AND is_deleted = 0
         AND due_date IS NOT NULL AND due_date &lt; #{today} AND done = 0
         ORDER BY due_date ASC, importance DESC
     </select>
 
     <select id="findById" resultMap="todoMap">
-        SELECT * FROM todo WHERE id = #{id}
+        SELECT * FROM todo WHERE id = #{id} AND is_deleted = 0
     </select>
 
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
@@ -76,7 +78,9 @@
         UPDATE todo SET done = #{done}, updated_at = #{updatedAt} WHERE id = #{id}
     </update>
 
-    <delete id="deleteById">
-        DELETE FROM todo WHERE id = #{id}
-    </delete>
+    <!-- 假删除：标记 is_deleted=1 -->
+    <update id="deleteById">
+        UPDATE todo SET is_deleted = 1, deleted_at = #{deletedAt}
+        WHERE id = #{id} AND is_deleted = 0
+    </update>
 </mapper>

@@ -7,6 +7,9 @@ CREATE TABLE IF NOT EXISTS `schedule` (
     `time_slot` TINYINT NOT NULL COMMENT '时间段 1-10',
     `location` VARCHAR(50) DEFAULT NULL COMMENT '地点',
     `created_at` BIGINT NOT NULL COMMENT '创建时间戳(ms)',
+    `is_deleted` TINYINT(1) NOT NULL DEFAULT 0 COMMENT '是否已删除 0=否 1=是',
+    `deleted_at` BIGINT DEFAULT NULL COMMENT '删除时间（毫秒时间戳）',
     PRIMARY KEY (`id`),
-    INDEX `idx_schedule_user` (`user_id`)
+    INDEX `idx_schedule_user` (`user_id`),
+    INDEX `idx_is_deleted` (`is_deleted`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='日程表';

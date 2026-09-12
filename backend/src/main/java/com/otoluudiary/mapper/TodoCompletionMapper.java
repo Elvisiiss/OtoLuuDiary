@@ -9,5 +9,5 @@ import org.apache.ibatis.annotations.Param;
 public interface TodoCompletionMapper {
     List<TodoCompletion> findByTodoId(@Param("todoId") Long todoId);
     int insert(TodoCompletion completion);
-    int deleteById(@Param("id") Long id);
+    int deleteById(@Param("id") Long id, @Param("deletedAt") Long deletedAt);
 }

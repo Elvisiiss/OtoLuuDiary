@@ -30,6 +30,6 @@ public class ScheduleService {
     }
 
     public boolean delete(Long id) {
-        return scheduleMapper.deleteById(id) > 0;
+        return scheduleMapper.deleteById(id, System.currentTimeMillis()) > 0;
     }
 }

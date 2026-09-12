@@ -9,5 +9,5 @@ import org.apache.ibatis.annotations.Param;
 public interface ScheduleMapper {
     List<Schedule> findByUserId(@Param("userId") String userId);
     int insert(Schedule schedule);
-    int deleteById(@Param("id") Long id);
+    int deleteById(@Param("id") Long id, @Param("deletedAt") Long deletedAt);
 }

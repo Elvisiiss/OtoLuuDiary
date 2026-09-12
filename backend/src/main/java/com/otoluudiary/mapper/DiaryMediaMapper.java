@@ -13,9 +13,9 @@ public interface DiaryMediaMapper {
 
     List<DiaryMedia> findByDiaryId(@Param("diaryId") String diaryId);
 
-    int deleteById(@Param("id") String id);
+    int deleteById(@Param("id") String id, @Param("deletedAt") Long deletedAt);
 
-    int deleteByDiaryId(@Param("diaryId") String diaryId);
+    int deleteByDiaryId(@Param("diaryId") String diaryId, @Param("deletedAt") Long deletedAt);
 
     DiaryMedia findById(@Param("id") String id);
 }

@@ -232,6 +232,6 @@ public class TodoService {
     }
 
     public boolean delete(Long id) {
-        return todoMapper.deleteById(id) > 0;
+        return todoMapper.deleteById(id, System.currentTimeMillis()) > 0;
     }
 }

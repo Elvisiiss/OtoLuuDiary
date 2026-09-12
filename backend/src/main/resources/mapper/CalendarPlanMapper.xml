@@ -8,11 +8,13 @@
         <result property="planDate" column="plan_date"/>
         <result property="content" column="content"/>
         <result property="createdAt" column="created_at"/>
+        <result property="isDeleted" column="is_deleted"/>
+        <result property="deletedAt" column="deleted_at"/>
     </resultMap>
 
     <select id="findByUserAndMonth" resultMap="planMap">
         SELECT * FROM calendar_plan
-        WHERE user_id = #{userId} AND plan_date BETWEEN #{startDate} AND #{endDate}
+        WHERE user_id = #{userId} AND is_deleted = 0 AND plan_date BETWEEN #{startDate} AND #{endDate}
         ORDER BY plan_date ASC, created_at ASC
     </select>
 
@@ -21,7 +23,9 @@
         VALUES (#{userId}, #{planDate}, #{content}, #{createdAt})
     </insert>
 
-    <delete id="deleteById">
-        DELETE FROM calendar_plan WHERE id = #{id}
-    </delete>
+    <!-- 假删除：标记 is_deleted=1 -->
+    <update id="deleteById">
+        UPDATE calendar_plan SET is_deleted = 1, deleted_at = #{deletedAt}
+        WHERE id = #{id} AND is_deleted = 0
+    </update>
 </mapper>

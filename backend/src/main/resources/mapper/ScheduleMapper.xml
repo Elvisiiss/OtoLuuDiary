@@ -10,10 +10,12 @@
         <result property="timeSlot" column="time_slot"/>
         <result property="location" column="location"/>
         <result property="createdAt" column="created_at"/>
+        <result property="isDeleted" column="is_deleted"/>
+        <result property="deletedAt" column="deleted_at"/>
     </resultMap>
 
     <select id="findByUserId" resultMap="scheduleMap">
-        SELECT * FROM schedule WHERE user_id = #{userId} ORDER BY time_slot ASC, day_of_week ASC
+        SELECT * FROM schedule WHERE user_id = #{userId} AND is_deleted = 0 ORDER BY time_slot ASC, day_of_week ASC
     </select>
 
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
@@ -21,7 +23,9 @@
         VALUES (#{userId}, #{name}, #{dayOfWeek}, #{timeSlot}, #{location}, #{createdAt})
     </insert>
 
-    <delete id="deleteById">
-        DELETE FROM schedule WHERE id = #{id}
-    </delete>
+    <!-- 假删除：标记 is_deleted=1 -->
+    <update id="deleteById">
+        UPDATE schedule SET is_deleted = 1, deleted_at = #{deletedAt}
+        WHERE id = #{id} AND is_deleted = 0
+    </update>
 </mapper>

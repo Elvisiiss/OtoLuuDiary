@@ -7,10 +7,12 @@
         <result property="todoId" column="todo_id"/>
         <result property="note" column="note"/>
         <result property="createdAt" column="created_at"/>
+        <result property="isDeleted" column="is_deleted"/>
+        <result property="deletedAt" column="deleted_at"/>
     </resultMap>
 
     <select id="findByTodoId" resultMap="completionMap">
-        SELECT * FROM todo_completion WHERE todo_id = #{todoId} ORDER BY created_at DESC
+        SELECT * FROM todo_completion WHERE todo_id = #{todoId} AND is_deleted = 0 ORDER BY created_at DESC
     </select>
 
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
@@ -18,7 +20,9 @@
         VALUES (#{todoId}, #{note}, #{createdAt})
     </insert>
 
-    <delete id="deleteById">
-        DELETE FROM todo_completion WHERE id = #{id}
-    </delete>
+    <!-- 假删除：标记 is_deleted=1 -->
+    <update id="deleteById">
+        UPDATE todo_completion SET is_deleted = 1, deleted_at = #{deletedAt}
+        WHERE id = #{id} AND is_deleted = 0
+    </update>
 </mapper>

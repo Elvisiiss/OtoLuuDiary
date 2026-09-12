@@ -94,10 +94,11 @@ public class DiaryService {
         return existing;
     }
 
-    /** 删除日记（同时删除关联的媒体文件）；ID 不存在返回 false */
+    /** 假删除日记（同时假删除关联的媒体文件）；ID 不存在返回 false */
     public boolean deleteById(String id) {
-        mediaService.deleteByDiaryId(id);
-        return diaryMapper.deleteById(id) > 0;
+        long now = System.currentTimeMillis();
+        mediaService.softDeleteByDiaryId(id, now);
+        return diaryMapper.deleteById(id, now) > 0;
     }
 
     /** 关键词搜索（限定用户） */

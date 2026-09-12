@@ -15,9 +15,12 @@ CREATE TABLE IF NOT EXISTS `todo` (
     `done` TINYINT(1) DEFAULT 0 COMMENT '是否完成 0否1是',
     `created_at` BIGINT NOT NULL COMMENT '创建时间戳(ms)',
     `updated_at` BIGINT NOT NULL COMMENT '更新时间戳(ms)',
+    `is_deleted` TINYINT(1) NOT NULL DEFAULT 0 COMMENT '是否已删除 0=否 1=是',
+    `deleted_at` BIGINT DEFAULT NULL COMMENT '删除时间（毫秒时间戳）',
     PRIMARY KEY (`id`),
     INDEX `idx_todo_user` (`user_id`),
-    INDEX `idx_todo_done` (`user_id`, `done`)
+    INDEX `idx_todo_done` (`user_id`, `done`),
+    INDEX `idx_is_deleted` (`is_deleted`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='待做清单';
 
 -- 待做完成记录表
@@ -26,8 +29,11 @@ CREATE TABLE IF NOT EXISTS `todo_completion` (
     `todo_id` BIGINT NOT NULL COMMENT '关联待做',
     `note` TEXT DEFAULT NULL COMMENT '完成时的描述',
     `created_at` BIGINT NOT NULL COMMENT '完成时间戳(ms)',
+    `is_deleted` TINYINT(1) NOT NULL DEFAULT 0 COMMENT '是否已删除 0=否 1=是',
+    `deleted_at` BIGINT DEFAULT NULL COMMENT '删除时间（毫秒时间戳）',
     PRIMARY KEY (`id`),
-    INDEX `idx_completion_todo` (`todo_id`)
+    INDEX `idx_completion_todo` (`todo_id`),
+    INDEX `idx_is_deleted` (`is_deleted`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='待做完成记录';
 
 -- 待做媒体文件表
@@ -39,6 +45,9 @@ CREATE TABLE IF NOT EXISTS `todo_media` (
     `file_type` VARCHAR(20) NOT NULL COMMENT 'image/video',
     `file_size` BIGINT DEFAULT 0 COMMENT '文件大小(bytes)',
     `created_at` BIGINT NOT NULL COMMENT '创建时间戳(ms)',
+    `is_deleted` TINYINT(1) NOT NULL DEFAULT 0 COMMENT '是否已删除 0=否 1=是',
+    `deleted_at` BIGINT DEFAULT NULL COMMENT '删除时间（毫秒时间戳）',
     PRIMARY KEY (`id`),
-    INDEX `idx_media_todo` (`todo_id`)
+    INDEX `idx_media_todo` (`todo_id`),
+    INDEX `idx_is_deleted` (`is_deleted`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='待做媒体文件';

@@ -9,6 +9,6 @@ import org.apache.ibatis.annotations.Param;
 public interface TodoMediaMapper {
     List<TodoMedia> findByTodoId(@Param("todoId") Long todoId);
     int insert(TodoMedia media);
-    int deleteById(@Param("id") Long id);
-    int deleteByTodoId(@Param("todoId") Long todoId);
+    int deleteById(@Param("id") Long id, @Param("deletedAt") Long deletedAt);
+    int deleteByTodoId(@Param("todoId") Long todoId, @Param("deletedAt") Long deletedAt);
 }

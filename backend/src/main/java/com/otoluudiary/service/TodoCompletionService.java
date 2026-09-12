@@ -27,6 +27,6 @@ public class TodoCompletionService {
     }
 
     public boolean delete(Long id) {
-        return completionMapper.deleteById(id) > 0;
+        return completionMapper.deleteById(id, System.currentTimeMillis()) > 0;
     }
 }

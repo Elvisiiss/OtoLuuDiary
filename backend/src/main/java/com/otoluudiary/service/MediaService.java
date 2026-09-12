@@ -69,32 +69,15 @@ public class MediaService {
         return diaryMediaMapper.findByDiaryId(diaryId);
     }
 
-    /** 删除单个媒体文件（含磁盘文件） */
+    /** 假删除单个媒体文件（不删除磁盘文件） */
     public boolean delete(String id) {
         DiaryMedia media = diaryMediaMapper.findById(id);
         if (media == null) return false;
-
-        // 删除磁盘文件
-        try {
-            Path filePath = Paths.get(uploadDir, media.getFilePath());
-            Files.deleteIfExists(filePath);
-        } catch (IOException ignored) {
-            // 文件删除失败不影响数据库清理
-        }
-
-        return diaryMediaMapper.deleteById(id) > 0;
+        return diaryMediaMapper.deleteById(id, System.currentTimeMillis()) > 0;
     }
 
-    /** 删除某篇日记的全部媒体 */
-    public void deleteByDiaryId(String diaryId) {
-        List<DiaryMedia> list = diaryMediaMapper.findByDiaryId(diaryId);
-        for (DiaryMedia m : list) {
-            try {
-                Path filePath = Paths.get(uploadDir, m.getFilePath());
-                Files.deleteIfExists(filePath);
-            } catch (IOException ignored) {
-            }
-        }
-        diaryMediaMapper.deleteByDiaryId(diaryId);
+    /** 假删除某篇日记的全部媒体（不删除磁盘文件） */
+    public void softDeleteByDiaryId(String diaryId, long deletedAt) {
+        diaryMediaMapper.deleteByDiaryId(diaryId, deletedAt);
     }
 }

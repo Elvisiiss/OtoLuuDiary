@@ -15,6 +15,8 @@ public class DiaryMedia {
     private String fileType;
     private Long fileSize;
     private Long createdAt;
+    private Boolean isDeleted;
+    private Long deletedAt;
 
     public DiaryMedia() {
     }
@@ -88,5 +90,21 @@ public class DiaryMedia {
 
     public void setCreatedAt(Long createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public Boolean getIsDeleted() {
+        return isDeleted;
+    }
+
+    public void setIsDeleted(Boolean isDeleted) {
+        this.isDeleted = isDeleted;
+    }
+
+    public Long getDeletedAt() {
+        return deletedAt;
+    }
+
+    public void setDeletedAt(Long deletedAt) {
+        this.deletedAt = deletedAt;
     }
 }

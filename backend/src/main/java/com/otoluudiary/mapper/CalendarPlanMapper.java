@@ -9,5 +9,5 @@ import org.apache.ibatis.annotations.Param;
 public interface CalendarPlanMapper {
     List<CalendarPlan> findByUserAndMonth(@Param("userId") String userId, @Param("startDate") String startDate, @Param("endDate") String endDate);
     int insert(CalendarPlan plan);
-    int deleteById(@Param("id") Long id);
+    int deleteById(@Param("id") Long id, @Param("deletedAt") Long deletedAt);
 }

@@ -10,10 +10,12 @@
         <result property="fileType" column="file_type"/>
         <result property="fileSize" column="file_size"/>
         <result property="createdAt" column="created_at"/>
+        <result property="isDeleted" column="is_deleted"/>
+        <result property="deletedAt" column="deleted_at"/>
     </resultMap>
 
     <select id="findByTodoId" resultMap="mediaMap">
-        SELECT * FROM todo_media WHERE todo_id = #{todoId} ORDER BY created_at ASC
+        SELECT * FROM todo_media WHERE todo_id = #{todoId} AND is_deleted = 0 ORDER BY created_at ASC
     </select>
 
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
@@ -21,11 +23,15 @@
         VALUES (#{todoId}, #{fileName}, #{filePath}, #{fileType}, #{fileSize}, #{createdAt})
     </insert>
 
-    <delete id="deleteById">
-        DELETE FROM todo_media WHERE id = #{id}
-    </delete>
+    <!-- 假删除：标记 is_deleted=1 -->
+    <update id="deleteById">
+        UPDATE todo_media SET is_deleted = 1, deleted_at = #{deletedAt}
+        WHERE id = #{id} AND is_deleted = 0
+    </update>
 
-    <delete id="deleteByTodoId">
-        DELETE FROM todo_media WHERE todo_id = #{todoId}
-    </delete>
+    <!-- 假删除：按待做ID批量标记 -->
+    <update id="deleteByTodoId">
+        UPDATE todo_media SET is_deleted = 1, deleted_at = #{deletedAt}
+        WHERE todo_id = #{todoId} AND is_deleted = 0
+    </update>
 </mapper>

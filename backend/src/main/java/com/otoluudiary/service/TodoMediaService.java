@@ -59,6 +59,6 @@ public class TodoMediaService {
     }
 
     public boolean delete(Long id) {
-        return todoMediaMapper.deleteById(id) > 0;
+        return todoMediaMapper.deleteById(id, System.currentTimeMillis()) > 0;
     }
 }

@@ -24,8 +24,8 @@ public interface DiaryMapper {
     /** 按 ID 更新一条日记，返回受影响行数（0 表示 ID 不存在） */
     int update(Diary diary);
 
-    /** 按 ID 删除，返回受影响行数（0 表示 ID 不存在） */
-    int deleteById(@Param("id") String id);
+    /** 按 ID 假删除，返回受影响行数（0 表示 ID 不存在或已删除） */
+    int deleteById(@Param("id") String id, @Param("deletedAt") Long deletedAt);
 
     /** 关键词搜索（标题或正文包含关键词），限定用户 */
     List<Diary> searchByKeyword(@Param("userId") String userId, @Param("keyword") String keyword);

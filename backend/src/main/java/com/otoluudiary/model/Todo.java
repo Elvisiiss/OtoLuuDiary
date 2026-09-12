@@ -16,6 +16,8 @@ public class Todo {
     private Boolean done;
     private Long createdAt;
     private Long updatedAt;
+    private Boolean isDeleted;
+    private Long deletedAt;
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -47,4 +49,8 @@ public class Todo {
     public void setCreatedAt(Long createdAt) { this.createdAt = createdAt; }
     public Long getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(Long updatedAt) { this.updatedAt = updatedAt; }
+    public Boolean getIsDeleted() { return isDeleted; }
+    public void setIsDeleted(Boolean isDeleted) { this.isDeleted = isDeleted; }
+    public Long getDeletedAt() { return deletedAt; }
+    public void setDeletedAt(Long deletedAt) { this.deletedAt = deletedAt; }
 }

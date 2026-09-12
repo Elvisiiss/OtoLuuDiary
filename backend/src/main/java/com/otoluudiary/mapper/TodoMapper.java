@@ -17,5 +17,5 @@ public interface TodoMapper {
     int insert(Todo todo);
     int update(Todo todo);
     int updateDone(@Param("id") Long id, @Param("done") Boolean done, @Param("updatedAt") Long updatedAt);
-    int deleteById(@Param("id") Long id);
+    int deleteById(@Param("id") Long id, @Param("deletedAt") Long deletedAt);
 }
